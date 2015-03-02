@@ -108,7 +108,7 @@ public class Main {
 
       time.start();
       
-      Emitter e = new Emitter(inputFile, parser, dfa);
+      Emitter e = Options.emitScala? new ScalaEmitter(inputFile, parser, dfa): new JavaEmitter(inputFile, parser, dfa);
       e.emit();
 
       time.stop();
