@@ -46,7 +46,10 @@ public class Options {
   public static boolean legacy_dot;
   /** If true, the generated scanner will include a constructor taking an InputStream. */
   public static boolean emitInputStreamCtor;
-    
+
+  /** If true, the generated scanner will be in Scala */
+  public static boolean emitScala;
+
 	static { setDefaults();	}
 
 
@@ -102,6 +105,8 @@ public class Options {
     legacy_dot = false;
     // TODO: in the JFlex version after 1.6, the emitInputStreamCtor option will cease to exist.
     emitInputStreamCtor = false;
+
+    emitScala = false;
     Skeleton.readDefault();
   }
 
