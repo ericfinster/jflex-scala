@@ -191,32 +191,33 @@ public class ScalaEmitter extends Emitter {
     println("            zzScanError(ZZ_NO_MATCH)");
   }
 
+  // TODO these breaks will not work
   protected void emitNextInput() {
     println("          if (zzCurrentPosL < zzEndReadL) {");
-    println("            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL);");
-    println("            zzCurrentPosL += Character.charCount(zzInput);");
+    println("            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
+    println("            zzCurrentPosL += Character.charCount(zzInput)");
     println("          }");
     println("          else if (zzAtEOF) {");
-    println("            zzInput = YYEOF;");
-    println("            break zzForAction;");
+    println("            zzInput = YYEOF");
+    println("            break zzForAction");
     println("          }");
     println("          else {");
     println("            // store back cached positions");
-    println("            zzCurrentPos  = zzCurrentPosL;");
-    println("            zzMarkedPos   = zzMarkedPosL;");
-    println("            boolean eof = zzRefill();");
+    println("            zzCurrentPos  = zzCurrentPosL");
+    println("            zzMarkedPos   = zzMarkedPosL");
+    println("            val eof = zzRefill()");
     println("            // get translated positions and possibly new buffer");
-    println("            zzCurrentPosL  = zzCurrentPos;");
-    println("            zzMarkedPosL   = zzMarkedPos;");
-    println("            zzBufferL      = zzBuffer;");
-    println("            zzEndReadL     = zzEndRead;");
+    println("            zzCurrentPosL  = zzCurrentPos");
+    println("            zzMarkedPosL   = zzMarkedPos");
+    println("            zzBufferL      = zzBuffer");
+    println("            zzEndReadL     = zzEndRead");
     println("            if (eof) {");
-    println("              zzInput = YYEOF;");
-    println("              break zzForAction;");
+    println("              zzInput = YYEOF");
+    println("              break zzForAction");
     println("            }");
     println("            else {");
-    println("              zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL);");
-    println("              zzCurrentPosL += Character.charCount(zzInput);");
+    println("              zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
+    println("              zzCurrentPosL += Character.charCount(zzInput)");
     println("            }");
     println("          }");
   }
@@ -228,8 +229,8 @@ public class ScalaEmitter extends Emitter {
     if (scanner.cup2Compatible) {
       println();
       println("/* CUP2 imports */");
-      println("import edu.tum.cup2.scanner.*;");
-      println("import edu.tum.cup2.grammar.*;");
+      println("import edu.tum.cup2.scanner._");
+      println("import edu.tum.cup2.grammar._");
       println();
     }
   }
@@ -248,8 +249,6 @@ public class ScalaEmitter extends Emitter {
       println(" * from the specification file <tt>" + path + "</tt>");
       println(" */");
     }
-
-    if (scanner.isPublic) print("public ");
 
     if (scanner.isAbstract) print("abstract ");
 
@@ -275,7 +274,7 @@ public class ScalaEmitter extends Emitter {
     for (String name : scanner.states.names()) {
       int num = scanner.states.getNumber(name);
 
-      println(" static final int " + name + " = " + 2 * num + ";");
+      println(" val " + name + " = " + 2 * num);
     }
 
     // can't quite get rid of the indirection, even for non-bol lex states:
@@ -283,12 +282,12 @@ public class ScalaEmitter extends Emitter {
     // (see bug #1540228)
     println("");
     println("  /**");
-    println("   * ZZ_LEXSTATE[l] is the state in the DFA for the lexical state l");
-    println("   * ZZ_LEXSTATE[l+1] is the state in the DFA for the lexical state l");
+    println("   * ZZ_LEXSTATE(l) is the state in the DFA for the lexical state l");
+    println("   * ZZ_LEXSTATE(l+1) is the state in the DFA for the lexical state l");
     println("   *                  at the beginning of a line");
     println("   * l is of the form l = 2*k, k a non negative integer");
     println("   */");
-    println("  private static final int ZZ_LEXSTATE[] = { ");
+    println("  val ZZ_LEXSTATE: Array[Int] = { ");
 
     int i, j = 0;
     print("    ");
@@ -306,7 +305,7 @@ public class ScalaEmitter extends Emitter {
     }
 
     println(dfa.entryState[i]);
-    println("  };");
+    println("  }");
   }
 
 
@@ -323,16 +322,18 @@ public class ScalaEmitter extends Emitter {
     println("   * @param packed   the packed character translation table");
     println("   * @return         the unpacked character translation table");
     println("   */");
-    println("  private static char [] zzUnpackCMap(String packed) {");
-    println("    char [] map = new char[0x" + Integer.toHexString(cl.getMaxCharCode() + 1) + "];");
-    println("    int i = 0;  /* index in packed string  */");
-    println("    int j = 0;  /* index in unpacked array */");
+    println("  def zzUnpackCMap(packed: String): Array[Char] = {");
+    println("    val map = new Array[Char](0x" + Integer.toHexString(cl.getMaxCharCode() + 1) + ")");
+    println("    var i = 0  /* index in packed string  */");
+    println("    var j = 0  /* index in unpacked array */");
     println("    while (i < " + 2 * packedCharMapPairs + ") {");
-    println("      int  count = packed.charAt(i++);");
-    println("      char value = packed.charAt(i++);");
-    println("      do map[j++] = value; while (--count > 0);");
+    println("      val count = packed.charAt(i); i++");
+    println("      val value = packed.charAt(i); i++");
+    println("      map(j) = value; j++; count -= 1");
+    println("      while(count > 0){");
+    println("        map(j) = value; j++; count -= 1"); // todo this -- wont work
     println("    }");
-    println("    return map;");
+    println("    map");
     println("  }");
   }
 
@@ -344,7 +345,7 @@ public class ScalaEmitter extends Emitter {
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  private static final char [] ZZ_CMAP = {");
+    println("  val ZZ_CMAP: Array[Char] = {");
 
     int n = 0;  // numbers of entries in current line
     print("    ");
@@ -366,7 +367,7 @@ public class ScalaEmitter extends Emitter {
     }
 
     println();
-    println("  };");
+    println("  }");
     println();
   }
 
@@ -395,7 +396,7 @@ public class ScalaEmitter extends Emitter {
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  private static final String ZZ_CMAP_PACKED = ");
+    println("  val ZZ_CMAP_PACKED: String = ");
 
     int n = 0;  // numbers of entries in current line
     print("    \"");
@@ -429,13 +430,13 @@ public class ScalaEmitter extends Emitter {
       i++;
     }
 
-    println("\";");
+    println("\"");
     println();
 
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  private static final char [] ZZ_CMAP = zzUnpackCMap(ZZ_CMAP_PACKED);");
+    println("  val ZZ_CMAP: Array[Char] = zzUnpackCMap(ZZ_CMAP_PACKED)");
     println();
     return numPairs;
   }
@@ -446,18 +447,19 @@ public class ScalaEmitter extends Emitter {
       println(scanner.classCode);
     }
 
+    // todo cup?
     if (scanner.cup2Compatible) {
-      // convenience methods for CUP2
-      println();
-      println("  /* CUP2 code: */");
-      println("  private <T> ScannerToken<T> token(Terminal terminal, T value) {");
-      println("    return new ScannerToken<T>(terminal, value, yyline, yycolumn);");
-      println("  }");
-      println();
-      println("  private ScannerToken<Object> token(Terminal terminal) {");
-      println("    return new ScannerToken<Object>(terminal, yyline, yycolumn);");
-      println("  }");
-      println();
+//      // convenience methods for CUP2
+//      println();
+//      println("  /* CUP2 code: */");
+//      println("  private <T> ScannerToken<T> token(Terminal terminal, T value) {");
+//      println("    return new ScannerToken<T>(terminal, value, yyline, yycolumn);");
+//      println("  }");
+//      println();
+//      println("  private ScannerToken<Object> token(Terminal terminal) {");
+//      println("    return new ScannerToken<Object>(terminal, yyline, yycolumn);");
+//      println("  }");
+//      println();
     }
   }
 
@@ -489,18 +491,16 @@ public class ScalaEmitter extends Emitter {
 
     if (!printCtorArgs) println(warn);
 
+    if (scanner.initThrow != null && printCtorArgs) {
+      println("  @throws " + scanner.initThrow);
+    }
     print("  ");
-
-    if (scanner.isPublic) print("public ");
     print(getBaseName(scanner.className));
-    print("(java.io.Reader in");
+    print("(in: java.io.Reader ");
     if (printCtorArgs) emitCtorArgs();
     print(")");
 
-    if (scanner.initThrow != null && printCtorArgs) {
-      print(" throws ");
-      print(scanner.initThrow);
-    }
+
 
     println(" {");
 
@@ -509,7 +509,7 @@ public class ScalaEmitter extends Emitter {
       print(scanner.initCode);
     }
 
-    println("    this.zzReader = in;");
+    println("    this.zzReader = in");
 
     println("  }");
     println();
@@ -525,17 +525,16 @@ public class ScalaEmitter extends Emitter {
       println("   */");
       if (!printCtorArgs) println(warn);
 
+      if (scanner.initThrow != null && printCtorArgs) {
+        println("  @throws " + scanner.initThrow);
+      }
       print("  ");
-      if (scanner.isPublic) print("public ");
       print(getBaseName(scanner.className));
-      print("(java.io.InputStream in");
+      print("(in: java.io.InputStream ");
       if (printCtorArgs) emitCtorArgs();
       print(")");
 
-      if (scanner.initThrow != null && printCtorArgs) {
-        print(" throws ");
-        print(scanner.initThrow);
-      }
+
 
       println(" {");
 
@@ -546,15 +545,16 @@ public class ScalaEmitter extends Emitter {
           print(", " + scanner.ctorArgs.get(i));
         }
       }
-      println(");");
+      println(")");
       println("  }");
     }
   }
 
   protected void emitCtorArgs() {
+    // todo might need to map java to scala primitive types here / otherwise
     for (int i = 0; i < scanner.ctorArgs.size(); i++) {
-      print(", " + scanner.ctorTypes.get(i));
-      print(" " + scanner.ctorArgs.get(i));
+      print(", " + scanner.ctorArgs.get(i));
+      print(": " + scanner.ctorTypes.get(i));
     }
   }
 
@@ -566,17 +566,15 @@ public class ScalaEmitter extends Emitter {
     println("   * when the end of file is reached");
     println("   */");
 
-    print("  private void zzDoEOF()");
-
     if (scanner.eofThrow != null) {
-      print(" throws ");
-      print(scanner.eofThrow);
+      print(" @throws ");
+      println(scanner.eofThrow);
     }
 
-    println(" {");
+    print("  def zzDoEOF() = {");
 
     println("    if (!zzEOFDone) {");
-    println("      zzEOFDone = true;");
+    println("      zzEOFDone = true");
     println("    " + scanner.eofCode);
     println("    }");
     println("  }");
@@ -588,7 +586,7 @@ public class ScalaEmitter extends Emitter {
 
     if (scanner.tokenType == null) {
       if (scanner.isInteger)
-        print("int");
+        print("Int");
       else if (scanner.isIntWrap)
         print("Integer");
       else
