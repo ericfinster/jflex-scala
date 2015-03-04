@@ -274,7 +274,7 @@ public class ScalaEmitter extends Emitter {
     for (String name : scanner.states.names()) {
       int num = scanner.states.getNumber(name);
 
-      println(" val " + name + " = " + 2 * num);
+      println("  final val " + name + " = " + 2 * num);
     }
 
     // can't quite get rid of the indirection, even for non-bol lex states:
@@ -287,7 +287,7 @@ public class ScalaEmitter extends Emitter {
     println("   *                  at the beginning of a line");
     println("   * l is of the form l = 2*k, k a non negative integer");
     println("   */");
-    println("  val ZZ_LEXSTATE: Array[Int] = { ");
+    println("  final val ZZ_LEXSTATE: Array[Int]( ");
 
     int i, j = 0;
     print("    ");
@@ -305,7 +305,7 @@ public class ScalaEmitter extends Emitter {
     }
 
     println(dfa.entryState[i]);
-    println("  }");
+    println("  )");
   }
 
 
@@ -345,7 +345,7 @@ public class ScalaEmitter extends Emitter {
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  val ZZ_CMAP: Array[Char] = {");
+    println("  final val ZZ_CMAP: Array[Char](");
 
     int n = 0;  // numbers of entries in current line
     print("    ");
@@ -367,7 +367,7 @@ public class ScalaEmitter extends Emitter {
     }
 
     println();
-    println("  }");
+    println("  )");
     println();
   }
 
@@ -396,7 +396,7 @@ public class ScalaEmitter extends Emitter {
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  val ZZ_CMAP_PACKED: String = ");
+    println("  final val ZZ_CMAP_PACKED: String = ");
 
     int n = 0;  // numbers of entries in current line
     print("    \"");
@@ -436,7 +436,7 @@ public class ScalaEmitter extends Emitter {
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  val ZZ_CMAP: Array[Char] = zzUnpackCMap(ZZ_CMAP_PACKED)");
+    println("  final val ZZ_CMAP: Array[Char] = zzUnpackCMap(ZZ_CMAP_PACKED)");
     println();
     return numPairs;
   }
@@ -449,17 +449,15 @@ public class ScalaEmitter extends Emitter {
 
     // todo cup?
     if (scanner.cup2Compatible) {
-//      // convenience methods for CUP2
-//      println();
-//      println("  /* CUP2 code: */");
-//      println("  private <T> ScannerToken<T> token(Terminal terminal, T value) {");
-//      println("    return new ScannerToken<T>(terminal, value, yyline, yycolumn);");
-//      println("  }");
-//      println();
-//      println("  private ScannerToken<Object> token(Terminal terminal) {");
-//      println("    return new ScannerToken<Object>(terminal, yyline, yycolumn);");
-//      println("  }");
-//      println();
+      // convenience methods for CUP2
+      println();
+      println("  /* CUP2 code: */");
+      println("  def token[T](Terminal terminal, T value): ScannerToken[T] = ");
+      println("    new ScannerToken[T](terminal, value, yyline, yycolumn)");
+      println();
+      println("  def token[Object](Terminal terminal) = ");
+      println("    new ScannerToken[Object](terminal, yyline, yycolumn)");
+      println();
     }
   }
 
@@ -494,13 +492,9 @@ public class ScalaEmitter extends Emitter {
     if (scanner.initThrow != null && printCtorArgs) {
       println("  @throws " + scanner.initThrow);
     }
-    print("  ");
-    print(getBaseName(scanner.className));
-    print("(in: java.io.Reader ");
+    print("  def this(in: java.io.Reader");
     if (printCtorArgs) emitCtorArgs();
     print(")");
-
-
 
     println(" {");
 
@@ -528,13 +522,9 @@ public class ScalaEmitter extends Emitter {
       if (scanner.initThrow != null && printCtorArgs) {
         println("  @throws " + scanner.initThrow);
       }
-      print("  ");
-      print(getBaseName(scanner.className));
-      print("(in: java.io.InputStream ");
+      print("  def this(in: java.io.InputStream");
       if (printCtorArgs) emitCtorArgs();
       print(")");
-
-
 
       println(" {");
 
@@ -584,6 +574,21 @@ public class ScalaEmitter extends Emitter {
 
   protected void emitLexFunctHeader() {
 
+    // todo make a function to emit throws
+    print(" @throws java.io.IOException");
+
+    if (scanner.lexThrow != null) {
+      print(" @throws " + scanner.lexThrow);
+    }
+
+    if (scanner.scanErrorException != null) {
+      print(" @throws " + scanner.scanErrorException);
+    }
+
+    // todo make a function for this
+    print(" def " + scanner.functionName + "(): ");
+
+    // todo make a function for this
     if (scanner.tokenType == null) {
       if (scanner.isInteger)
         print("Int");
@@ -594,79 +599,56 @@ public class ScalaEmitter extends Emitter {
     } else
       print(scanner.tokenType);
 
-    print(" ");
-
-    print(scanner.functionName);
-
-    print("() throws java.io.IOException");
-
-    if (scanner.lexThrow != null) {
-      print(", ");
-      print(scanner.lexThrow);
-    }
-
-    if (scanner.scanErrorException != null) {
-      print(", ");
-      print(scanner.scanErrorException);
-    }
-
-    println(" {");
+    print(" = {");
 
     skel.emitNext();
 
-    println("    int [] zzTransL = ZZ_TRANS;");
-    println("    int [] zzRowMapL = ZZ_ROWMAP;");
-    println("    int [] zzAttrL = ZZ_ATTRIBUTE;");
+    println("    val zzTransL: Array[Int] = ZZ_TRANS");
+    println("    val zzRowMapL: Array[Int] = ZZ_ROWMAP");
+    println("    val zzAttrL: Array[Int] = ZZ_ATTRIBUTE");
 
     skel.emitNext();
 
     if (scanner.charCount) {
-      println("      yychar+= zzMarkedPosL-zzStartRead;");
+      println("      yychar += zzMarkedPosL-zzStartRead");
       println("");
     }
 
     if (scanner.lineCount || scanner.columnCount) {
-      println("      boolean zzR = false;");
-      println("      int zzCh;");
-      println("      int zzCharCount;");
+      println("      var zzR = false");
+      println("      var zzCh: Int");
+      println("      var zzCharCount: Int");
       println("      for (zzCurrentPosL = zzStartRead  ;");
       println("           zzCurrentPosL < zzMarkedPosL ;");
       println("           zzCurrentPosL += zzCharCount ) {");
-      println("        zzCh = Character.codePointAt(zzBufferL, zzCurrentPosL, zzMarkedPosL);");
-      println("        zzCharCount = Character.charCount(zzCh);");
-      println("        switch (zzCh) {");
-      println("        case '\\u000B':");
-      println("        case '\\u000C':");
-      println("        case '\\u0085':");
-      println("        case '\\u2028':");
-      println("        case '\\u2029':");
+      println("        zzCh = Character.codePointAt(zzBufferL, zzCurrentPosL, zzMarkedPosL)");
+      println("        zzCharCount = Character.charCount(zzCh)");
+      println("        zzCh match {");
+      println("        case '\\u000B' | '\\u000C' | '\\u0085' | '\\u2028' | '\\u2029' =>");
       if (scanner.lineCount)
-        println("          yyline++;");
+        println("          yyline += 1");
       if (scanner.columnCount)
-        println("          yycolumn = 0;");
-      println("          zzR = false;");
-      println("          break;");
-      println("        case '\\r':");
+        println("          yycolumn = 0");
+      println("          zzR = false");
+      println("        case '\\r' =>");
       if (scanner.lineCount)
-        println("          yyline++;");
+        println("          yyline += 1");
       if (scanner.columnCount)
-        println("          yycolumn = 0;");
-      println("          zzR = true;");
-      println("          break;");
-      println("        case '\\n':");
+        println("          yycolumn = 0");
+      println("          zzR = true");
+      println("        case '\\n' => ");
       println("          if (zzR)");
-      println("            zzR = false;");
+      println("            zzR = false");
       println("          else {");
       if (scanner.lineCount)
-        println("            yyline++;");
+        println("            yyline += 1");
       if (scanner.columnCount)
-        println("            yycolumn = 0;");
+        println("            yycolumn = 0");
       println("          }");
-      println("          break;");
-      println("        default:");
-      println("          zzR = false;");
+      println("        case _ =>");
+      println("          zzR = false");
       if (scanner.columnCount)
-        println("          yycolumn += zzCharCount;");
+        println("          yycolumn += zzCharCount");
       println("        }");
       println("      }");
       println();
@@ -674,22 +656,22 @@ public class ScalaEmitter extends Emitter {
       if (scanner.lineCount) {
         println("      if (zzR) {");
         println("        // peek one character ahead if it is \\n (if we have counted one line too much)");
-        println("        boolean zzPeek;");
+        println("        val zzPeek: Boolean");
         println("        if (zzMarkedPosL < zzEndReadL)");
-        println("          zzPeek = zzBufferL[zzMarkedPosL] == '\\n';");
+        println("          zzPeek = zzBufferL(zzMarkedPosL) == '\\n'");
         println("        else if (zzAtEOF)");
-        println("          zzPeek = false;");
+        println("          zzPeek = false");
         println("        else {");
-        println("          boolean eof = zzRefill();");
-        println("          zzEndReadL = zzEndRead;");
-        println("          zzMarkedPosL = zzMarkedPos;");
-        println("          zzBufferL = zzBuffer;");
+        println("          val eof = zzRefill()");
+        println("          zzEndReadL = zzEndRead");
+        println("          zzMarkedPosL = zzMarkedPos");
+        println("          zzBufferL = zzBuffer");
         println("          if (eof) ");
-        println("            zzPeek = false;");
+        println("            zzPeek = false");
         println("          else ");
-        println("            zzPeek = zzBufferL[zzMarkedPosL] == '\\n';");
+        println("            zzPeek = zzBufferL[zzMarkedPosL] == '\\n'");
         println("        }");
-        println("        if (zzPeek) yyline--;");
+        println("        if (zzPeek) yyline -= 1");
         println("      }");
       }
     }
@@ -699,33 +681,25 @@ public class ScalaEmitter extends Emitter {
       // if match was empty, last value of zzAtBOL can be used
       // zzStartRead is always >= 0
       println("      if (zzMarkedPosL > zzStartRead) {");
-      println("        switch (zzBufferL[zzMarkedPosL-1]) {");
-      println("        case '\\n':");
-      println("        case '\\u000B':");
-      println("        case '\\u000C':");
-      println("        case '\\u0085':");
-      println("        case '\\u2028':");
-      println("        case '\\u2029':");
-      println("          zzAtBOL = true;");
-      println("          break;");
-      println("        case '\\r': ");
+      println("        zzBufferL(zzMarkedPosL-1) match {");
+      println("        case '\\n' | '\\u000B' | '\\u000C' | '\\u0085' | '\\u2028' | '\\u2029' => ");
+      println("          zzAtBOL = true");
+      println("        case '\\r' =>");
       println("          if (zzMarkedPosL < zzEndReadL)");
-      println("            zzAtBOL = zzBufferL[zzMarkedPosL] != '\\n';");
+      println("            zzAtBOL = zzBufferL(zzMarkedPosL) != '\\n'");
       println("          else if (zzAtEOF)");
-      println("            zzAtBOL = false;");
+      println("            zzAtBOL = false");
       println("          else {");
-      println("            boolean eof = zzRefill();");
-      println("            zzMarkedPosL = zzMarkedPos;");
-      println("            zzEndReadL = zzEndRead;");
-      println("            zzBufferL = zzBuffer;");
+      println("            val eof = zzRefill()");
+      println("            zzMarkedPosL = zzMarkedPos");
+      println("            zzEndReadL = zzEndRead");
+      println("            zzBufferL = zzBuffer");
       println("            if (eof) ");
-      println("              zzAtBOL = false;");
+      println("              zzAtBOL = false");
       println("            else ");
-      println("              zzAtBOL = zzBufferL[zzMarkedPosL] != '\\n';");
+      println("              zzAtBOL = zzBufferL(zzMarkedPosL) != '\\n'");
       println("          }");
-      println("          break;");
-      println("        default:");
-      println("          zzAtBOL = false;");
+      println("        case _ => zzAtBOL = false");
       println("        }");
       println("      }");
     }
@@ -734,19 +708,19 @@ public class ScalaEmitter extends Emitter {
 
     if (scanner.bolUsed) {
       println("      if (zzAtBOL)");
-      println("        zzState = ZZ_LEXSTATE[zzLexicalState+1];");
+      println("        zzState = ZZ_LEXSTATE(zzLexicalState+1)");
       println("      else");
-      println("        zzState = ZZ_LEXSTATE[zzLexicalState];");
+      println("        zzState = ZZ_LEXSTATE(zzLexicalState)");
       println();
     } else {
-      println("      zzState = ZZ_LEXSTATE[zzLexicalState];");
+      println("      zzState = ZZ_LEXSTATE(zzLexicalState)");
       println();
     }
 
     println("      // set up zzAction for empty match case:");
-    println("      int zzAttributes = zzAttrL[zzState];");
+    println("      var zzAttributes = zzAttrL(zzState);");
     println("      if ( (zzAttributes & 1) == 1 ) {");
-    println("        zzAction = zzState;");
+    println("        zzAction = zzState");
     println("      }");
     println();
 
@@ -755,24 +729,24 @@ public class ScalaEmitter extends Emitter {
 
 
   protected void emitGetRowMapNext() {
-    println("          int zzNext = zzTransL[ zzRowMapL[zzState] + zzCMapL[zzInput] ];");
-    println("          if (zzNext == " + DFA.NO_TARGET + ") break zzForAction;");
-    println("          zzState = zzNext;");
+    println("          var zzNext = zzTransL(zzRowMapL(zzState) + zzCMapL(zzInput))");
+    println("          if (zzNext == " + DFA.NO_TARGET + ") break zzForAction"); // todo this won't work
+    println("          zzState = zzNext");
     println();
 
-    println("          zzAttributes = zzAttrL[zzState];");
+    println("          zzAttributes = zzAttrL(zzState)");
 
     println("          if ( (zzAttributes & " + FINAL + ") == " + FINAL + " ) {");
 
     skel.emitNext();
 
-    println("            if ( (zzAttributes & " + NOLOOK + ") == " + NOLOOK + " ) break zzForAction;");
+    println("            if ( (zzAttributes & " + NOLOOK + ") == " + NOLOOK + " ) break zzForAction");
 
     skel.emitNext();
   }
 
   protected void emitActions() {
-    println("        switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {");
+    println("        if (zzAction < 0) zzAction else ZZ_ACTION(zzAction) match {");
 
     int i = actionTable.size() + 1;
 
@@ -780,64 +754,66 @@ public class ScalaEmitter extends Emitter {
       Action action = entry.getKey();
       int label = entry.getValue();
 
-      println("          case " + label + ": ");
+      println("          case " + label + "=> ");
 
       if (action.lookAhead() == Action.FIXED_BASE) {
         println("            // lookahead expression with fixed base length");
         println("            zzMarkedPos = Character.offsetByCodePoints");
-        println("                (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzStartRead, " + action.getLookLength() + ");");
+        println("                (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzStartRead, " + action.getLookLength() + ")");
       }
 
       if (action.lookAhead() == Action.FIXED_LOOK ||
               action.lookAhead() == Action.FINITE_CHOICE) {
         println("            // lookahead expression with fixed lookahead length");
         println("            zzMarkedPos = Character.offsetByCodePoints");
-        println("                (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzMarkedPos, -" + action.getLookLength() + ");");
+        println("                (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzMarkedPos, -" + action.getLookLength() + ")");
       }
 
       if (action.lookAhead() == Action.GENERAL_LOOK) {
         println("            // general lookahead, find correct zzMarkedPos");
-        println("            { int zzFState = " + dfa.entryState[action.getEntryState()] + ";");
-        println("              int zzFPos = zzStartRead;");
-        println("              if (zzFin.length <= zzBufferL.length) { zzFin = new boolean[zzBufferL.length+1]; }");
-        println("              boolean zzFinL[] = zzFin;");
+        println("            { var zzFState = " + dfa.entryState[action.getEntryState()]);
+        println("              var zzFPos = zzStartRead");
+        println("              if (zzFin.length <= zzBufferL.length) { zzFin = new Array[Boolean](zzBufferL.length+1) }");
+        println("              val zzFinL = zzFin");
         println("              while (zzFState != -1 && zzFPos < zzMarkedPos) {");
-        println("                zzFinL[zzFPos] = ((zzAttrL[zzFState] & 1) == 1);");
-        println("                zzInput = Character.codePointAt(zzBufferL, zzFPos, zzMarkedPos);");
-        println("                zzFPos += Character.charCount(zzInput);");
-        println("                zzFState = zzTransL[ zzRowMapL[zzFState] + zzCMapL[zzInput] ];");
+        println("                zzFinL(zzFPos) = ((zzAttrL(zzFState) & 1) == 1)");
+        println("                zzInput = Character.codePointAt(zzBufferL, zzFPos, zzMarkedPos)");
+        println("                zzFPos += Character.charCount(zzInput)");
+        println("                zzFState = zzTransL( zzRowMapL(zzFState) + zzCMapL(zzInput) )");
         println("              }");
-        println("              if (zzFState != -1) { zzFinL[zzFPos++] = ((zzAttrL[zzFState] & 1) == 1); } ");
+        println("              if (zzFState != -1) { zzFinL(zzFPos) = ((zzAttrL(zzFState) & 1) == 1) } "); // incorrect place to increment zzFPos?
+        println("              zzFPos += 1");
         println("              while (zzFPos <= zzMarkedPos) {");
-        println("                zzFinL[zzFPos++] = false;");
+        println("                zzFinL[zzFPos] = false");
+        println("                zzFPos += 1");
         println("              }");
         println();
-        println("              zzFState = " + dfa.entryState[action.getEntryState() + 1] + ";");
-        println("              zzFPos = zzMarkedPos;");
+        println("              zzFState = " + dfa.entryState[action.getEntryState() + 1]);
+        println("              zzFPos = zzMarkedPos");
         println("              while (!zzFinL[zzFPos] || (zzAttrL[zzFState] & 1) != 1) {");
-        println("                zzInput = Character.codePointBefore(zzBufferL, zzFPos, zzStartRead);");
-        println("                zzFPos -= Character.charCount(zzInput);");
-        println("                zzFState = zzTransL[ zzRowMapL[zzFState] + zzCMapL[zzInput] ];");
-        println("              };");
-        println("              zzMarkedPos = zzFPos;");
+        println("                zzInput = Character.codePointBefore(zzBufferL, zzFPos, zzStartRead)");
+        println("                zzFPos -= Character.charCount(zzInput)");
+        println("                zzFState = zzTransL( zzRowMapL(zzFState) + zzCMapL(zzInput) )");
+        println("              }");
+        println("              zzMarkedPos = zzFPos");
         println("            }");
       }
 
       if (scanner.debugOption) {
-        print("            System.out.println(");
+        print("            println(");
         if (scanner.lineCount)
           print("\"line: \"+(yyline+1)+\" \"+");
         if (scanner.columnCount)
           print("\"col: \"+(yycolumn+1)+\" \"+");
         println("\"match: --\"+zzToPrintable(yytext())+\"--\");");
-        print("            System.out.println(\"action [" + action.priority + "] { ");
+        print("            println(\"action [" + action.priority + "] { ");
         print(escapify(action.content));
         println(" }\");");
       }
 
       println("            { " + action.content);
       println("            }");
-      println("          case " + (i++) + ": break;");
+      println("          case " + (i++) + "=> // noop");
     }
   }
 
@@ -845,10 +821,10 @@ public class ScalaEmitter extends Emitter {
     EOFActions eofActions = parser.getEOFActions();
 
     if (scanner.eofCode != null)
-      println("            zzDoEOF();");
+      println("            zzDoEOF()");
 
     if (eofActions.numActions() > 0) {
-      println("            switch (zzLexicalState) {");
+      println("            zzLexicalState match {");
 
       // pick a start value for break case labels.
       // must be larger than any value of a lex state:
@@ -859,25 +835,25 @@ public class ScalaEmitter extends Emitter {
         Action action = eofActions.getAction(num);
 
         if (action != null) {
-          println("            case " + name + ": {");
+          println("            case " + name + "=> {");
           if (scanner.debugOption) {
-            print("              System.out.println(");
+            print("              println(");
             if (scanner.lineCount)
               print("\"line: \"+(yyline+1)+\" \"+");
             if (scanner.columnCount)
               print("\"col: \"+(yycolumn+1)+\" \"+");
             println("\"match: <<EOF>>\");");
-            print("              System.out.println(\"action [" + action.priority + "] { ");
+            print("              println(\"action [" + action.priority + "] { ");
             print(escapify(action.content));
-            println(" }\");");
+            println(" }\")");
           }
           println("              " + action.content);
           println("            }");
-          println("            case " + (++last) + ": break;");
+          println("            case " + (++last) + "=> //noop");
         }
       }
 
-      println("            default:");
+      println("            case _ => ");
     }
 
     Action defaultAction = eofActions.getDefault();
@@ -885,15 +861,15 @@ public class ScalaEmitter extends Emitter {
     if (defaultAction != null) {
       println("              {");
       if (scanner.debugOption) {
-        print("                System.out.println(");
+        print("                println(");
         if (scanner.lineCount)
           print("\"line: \"+(yyline+1)+\" \"+");
         if (scanner.columnCount)
           print("\"col: \"+(yycolumn+1)+\" \"+");
         println("\"match: <<EOF>>\");");
-        print("                System.out.println(\"action [" + defaultAction.priority + "] { ");
+        print("                println(\"action [" + defaultAction.priority + "] { ");
         print(escapify(defaultAction.content));
-        println(" }\");");
+        println(" }\")");
       }
       println("                " + defaultAction.content);
       println("              }");
@@ -904,9 +880,9 @@ public class ScalaEmitter extends Emitter {
         Out.error(ErrorMessages.INT_AND_TYPE);
         throw new GeneratorException();
       }
-      println("        return YYEOF;");
+      println("        return YYEOF");
     } else
-      println("        return null;");
+      println("        return null");
 
     if (eofActions.numActions() > 0)
       println("        }");
@@ -917,7 +893,7 @@ public class ScalaEmitter extends Emitter {
    */
   protected void setupEOFCode() {
     if (scanner.eofclose) {
-      scanner.eofCode = LexScan.conc(scanner.eofCode, "  yyclose();");
+      scanner.eofCode = LexScan.conc(scanner.eofCode, "  yyclose()");
       scanner.eofThrow = LexScan.concExc(scanner.eofThrow, "java.io.IOException");
     }
   }
@@ -940,12 +916,13 @@ public class ScalaEmitter extends Emitter {
     emitUserCode();
     emitClassName();
 
+    // this is where things become java
     skel.emitNext();
 
-    println("  private static final int ZZ_BUFFERSIZE = " + scanner.bufferSize + ";");
+    println("  final val ZZ_BUFFERSIZE = " + scanner.bufferSize);
 
     if (scanner.debugOption) {
-      println("  private static final String ZZ_NL = System.getProperty(\"line.separator\");");
+      println("  final val ZZ_NL = System.getProperty(\"line.separator\")");
     }
 
     skel.emitNext();
@@ -980,21 +957,22 @@ public class ScalaEmitter extends Emitter {
 
     if (scanner.debugOption) {
       println("");
-      println("  private static String zzToPrintable(String str) {");
-      println("    StringBuilder builder = new StringBuilder();");
-      println("    for (int n = 0 ; n < str.length() ; ) {");
-      println("      int ch = str.codePointAt(n);");
-      println("      int charCount = Character.charCount(ch);");
-      println("      n += charCount;");
+      println("  def zzToPrintable(str: String): String = {");
+      println("    StringBuilder builder = new StringBuilder()");
+      println("    var n = 0");
+      println("    while (n < str.length()) {");
+      println("      val ch = str.codePointAt(n)");
+      println("      val charCount = Character.charCount(ch)");
+      println("      n += charCount");
       println("      if (ch > 31 && ch < 127) {");
-      println("        builder.append((char)ch);");
+      println("        builder.append((char)ch)");
       println("      } else if (charCount == 1) {");
-      println("        builder.append(String.format(\"\\\\u%04X\", ch));");
+      println("        builder.append(String.format(\"\\\\u%04X\", ch))");
       println("      } else {");
-      println("        builder.append(String.format(\"\\\\U%06X\", ch));");
+      println("        builder.append(String.format(\"\\\\U%06X\", ch))");
       println("      }");
       println("    }");
-      println("    return builder.toString();");
+      println("    builder.toString()");
       println("  }");
     }
 

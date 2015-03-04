@@ -235,7 +235,12 @@ public class Main {
         Options.legacy_dot = true;
         continue;
       }
-        
+
+      if ( argv[i].equals("--scala") || argv[i].equals("-scala") ) { //$NON-NLS-1$ //$NON-NLS-2$
+        Options.emitScala = true;
+        continue;
+      }
+
       // TODO: In the JFlex version after 1.6, --inputstreamctor will be removed.
       if ( argv[i].equals("--inputstreamctor") || argv[i].equals("-inputstreamctor") ) { //$NON-NLS-1$ //$NON-NLS-2$
         Options.emitInputStreamCtor = true;
