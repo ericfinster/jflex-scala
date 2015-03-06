@@ -262,6 +262,7 @@ public class ScalaEmitter extends Emitter {
 
     print("class ");
     print(scanner.className);
+    print("(in: Reader) ");
 
     if (scanner.isExtending != null) {
       print(" extends ");
@@ -1080,7 +1081,7 @@ public class ScalaEmitter extends Emitter {
 
     skel.emitNext();
 
-    emitConstructorDecl();
+//    emitConstructorDecl();
 
     emitCharMapInitFunction(packedCharMapPairs);
 

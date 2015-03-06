@@ -22,7 +22,7 @@
 
 --- isFinal list
   /** the input device */
-  var zzReader: java.io.Reader
+  var zzReader = in
 
   /** the current state of the DFA */
   var zzState: Int
@@ -35,29 +35,29 @@
   var zzBuffer = new Array[Char](ZZ_BUFFERSIZE)
 
   /** the textposition at the last accepting state */
-  var zzMarkedPos: Int
+  var zzMarkedPos = 0
 
   /** the current text position in the buffer */
-  var zzCurrentPos: Int
+  var zzCurrentPos = 0
 
   /** startRead marks the beginning of the yytext() string in the buffer */
-  var zzStartRead: Int
+  var zzStartRead = 0
 
   /** endRead marks the last character in the buffer, that has been read
       from input */
-  var zzEndRead: Int
+  var zzEndRead = 0
 
   /** number of newlines encountered up to the start of the matched text */
-  var yyline: Int
+  var yyline = 0
 
   /** the number of characters up to the start of the matched text */
-  var yychar: Int
+  var yychar = 0
 
   /**
    * the number of characters from the last newline up to the start of the 
    * matched text
    */
-  var yycolumn: Int
+  var yycolumn = 0
 
   /** 
    * zzAtBOL == true <=> the scanner is currently at the beginning of a line
@@ -65,10 +65,10 @@
   var zzAtBOL = true
 
   /** zzAtEOF == true <=> the scanner is at the EOF */
-  var zzAtEOF: Boolean
+  var zzAtEOF = false
 
   /** denotes if the user-EOF-code has already been executed */
-  var zzEOFDone: Boolean
+  var zzEOFDone = false
   
   /** 
    * The number of occupied positions in zzBuffer beyond zzEndRead.
@@ -76,7 +76,7 @@
    * into the final zzBuffer position, this will have a value of 1;
    * otherwise, it will have a value of 0.
    */
-  var zzFinalHighSurrogate = 0;
+  var zzFinalHighSurrogate = 0
 
 --- user class code
 
