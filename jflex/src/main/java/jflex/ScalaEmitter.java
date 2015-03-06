@@ -34,9 +34,9 @@ public class ScalaEmitter extends Emitter {
 
   protected void emitScanError() {
     if (scanner.scanErrorException != null)
-      print("  @throws classOf[" + scanner.scanErrorException + "]");
+      println("  @throws classOf[" + scanner.scanErrorException + "]");
 
-    print("  def zzScanError(errorCode: Int) = {");
+    println("  def zzScanError(errorCode: Int) = {");
 
     skel.emitNext();
 
@@ -48,9 +48,9 @@ public class ScalaEmitter extends Emitter {
     skel.emitNext();
 
     if (scanner.scanErrorException != null)
-      print(" @throws classOf[" + scanner.scanErrorException + "]");
+      println(" @throws classOf[" + scanner.scanErrorException + "]");
 
-    print(" def yypushback(number: Int) = {");
+    println(" def yypushback(number: Int) = {");
   }
 
   protected void emitMain() {
@@ -287,7 +287,7 @@ public class ScalaEmitter extends Emitter {
     println("   *                  at the beginning of a line");
     println("   * l is of the form l = 2*k, k a non negative integer");
     println("   */");
-    println("  final val ZZ_LEXSTATE: Array[Int]( ");
+    println("  final val ZZ_LEXSTATE = Array[Int]( ");
 
     int i, j = 0;
     print("    ");
@@ -306,6 +306,41 @@ public class ScalaEmitter extends Emitter {
 
     println(dfa.entryState[i]);
     println("  )");
+  }
+
+  protected void emitDynamicInit() {
+    int count = 0;
+    int value = dfa.table[0][0];
+
+    println("  /** ");
+    println("   * The transition table of the DFA");
+    println("   */");
+
+    ScalaCountEmitter e = new ScalaCountEmitter("Trans");
+    e.setValTranslation(+1); // allow vals in [-1, 0xFFFE]
+    e.emitInit();
+
+    for (int i = 0; i < dfa.numStates; i++) {
+      if (!rowKilled[i]) {
+        for (int c = 0; c < dfa.numInput; c++) {
+          if (!colKilled[c]) {
+            if (dfa.table[i][c] == value) {
+              count++;
+            } else {
+              e.emit(count, value);
+
+              count = 1;
+              value = dfa.table[i][c];
+            }
+          }
+        }
+      }
+    }
+
+    e.emit(count, value);
+    e.emitUnpack();
+
+    println(e.toString());
   }
 
 
@@ -327,11 +362,12 @@ public class ScalaEmitter extends Emitter {
     println("    var i = 0  /* index in packed string  */");
     println("    var j = 0  /* index in unpacked array */");
     println("    while (i < " + 2 * packedCharMapPairs + ") {");
-    println("      val count = packed.charAt(i); i++");
-    println("      val value = packed.charAt(i); i++");
-    println("      map(j) = value; j++; count -= 1");
+    println("      var count = packed.charAt(i); i += 1");
+    println("      val value = packed.charAt(i); i += 1");
+    println("      map(j) = value; j += 1; count -= 1");
     println("      while(count > 0){");
-    println("        map(j) = value; j++; count -= 1"); // todo this -- wont work
+    println("        map(j) = value; j += 1; count -= 1");
+    println("      }");
     println("    }");
     println("    map");
     println("  }");
@@ -441,6 +477,54 @@ public class ScalaEmitter extends Emitter {
     return numPairs;
   }
 
+  protected void emitRowMapArray() {
+    println("");
+    println("  /** ");
+    println("   * Translates a state to a row index in the transition table");
+    println("   */");
+
+    ScalaHiLowEmitter e = new ScalaHiLowEmitter("RowMap");
+    e.emitInit();
+    for (int i = 0; i < dfa.numStates; i++) {
+      e.emit(rowMap[i] * numCols);
+    }
+    e.emitUnpack();
+    println(e.toString());
+  }
+
+  protected void emitAttributes() {
+    println("  /**");
+    println("   * ZZ_ATTRIBUTE[aState] contains the attributes of state <code>aState</code>");
+    println("   */");
+
+    ScalaCountEmitter e = new ScalaCountEmitter("Attribute");
+    e.emitInit();
+
+    int count = 1;
+    int value = 0;
+    if (dfa.isFinal[0]) value = FINAL;
+    if (!isTransition[0]) value |= NOLOOK;
+
+    for (int i = 1; i < dfa.numStates; i++) {
+      int attribute = 0;
+      if (dfa.isFinal[i]) attribute = FINAL;
+      if (!isTransition[i]) attribute |= NOLOOK;
+
+      if (value == attribute) {
+        count++;
+      } else {
+        e.emit(count, value);
+        count = 1;
+        value = attribute;
+      }
+    }
+
+    e.emit(count, value);
+    e.emitUnpack();
+
+    println(e.toString());
+  }
+
   protected void emitClassCode() {
     if (scanner.classCode != null) {
       println("  /* user code: */");
@@ -503,7 +587,7 @@ public class ScalaEmitter extends Emitter {
       print(scanner.initCode);
     }
 
-    println("    this.zzReader = in");
+    println("    this(); zzReader = in");
 
     println("  }");
     println();
@@ -582,7 +666,7 @@ public class ScalaEmitter extends Emitter {
     }
 
     if (scanner.scanErrorException != null) {
-      print(" @throws " + scanner.scanErrorException);
+      println(" @throws " + scanner.scanErrorException);
     }
 
     // todo make a function for this
@@ -599,7 +683,7 @@ public class ScalaEmitter extends Emitter {
     } else
       print(scanner.tokenType);
 
-    print(" = {");
+    println(" = {");
 
     skel.emitNext();
 
@@ -669,7 +753,7 @@ public class ScalaEmitter extends Emitter {
         println("          if (eof) ");
         println("            zzPeek = false");
         println("          else ");
-        println("            zzPeek = zzBufferL[zzMarkedPosL] == '\\n'");
+        println("            zzPeek = zzBufferL(zzMarkedPosL) == '\\n'");
         println("        }");
         println("        if (zzPeek) yyline -= 1");
         println("      }");
@@ -743,6 +827,47 @@ public class ScalaEmitter extends Emitter {
     println("            if ( (zzAttributes & " + NOLOOK + ") == " + NOLOOK + " ) break zzForAction");
 
     skel.emitNext();
+  }
+
+  public void emitActionTable() {
+    int lastAction = 1;
+    int count = 0;
+    int value = 0;
+
+    println("  /** ");
+    println("   * Translates DFA states to action switch labels.");
+    println("   */");
+    ScalaCountEmitter e = new ScalaCountEmitter("Action");
+    e.emitInit();
+
+    for (int i = 0; i < dfa.numStates; i++) {
+      int newVal = 0;
+      if ( dfa.isFinal[i] ) {
+        Action action = dfa.action[i];
+        if (action.isEmittable()) {
+          Integer stored = actionTable.get(action);
+          if ( stored == null ) {
+            stored = lastAction++;
+            actionTable.put(action, stored);
+          }
+          newVal = stored;
+        }
+      }
+
+      if (value == newVal) {
+        count++;
+      }
+      else {
+        if (count > 0) e.emit(count,value);
+        count = 1;
+        value = newVal;
+      }
+    }
+
+    if (count > 0) e.emit(count,value);
+
+    e.emitUnpack();
+    println(e.toString());
   }
 
   protected void emitActions() {

@@ -26,7 +26,7 @@ import java.util.Locale;
  * @author Gerwin Klein
  * @version JFlex 1.6.1-SNAPSHOT
  */
-public abstract class PackEmitter {
+public abstract class JavaPackEmitter {
 
   /** name of the generated array (mixed case, no yy prefix) */
   protected String name;
@@ -60,7 +60,7 @@ public abstract class PackEmitter {
    * 
    * @param name  the name of the generated array
    */
-  public PackEmitter(String name) {
+  public JavaPackEmitter(String name) {
     this.name = name;
   }
   
@@ -69,7 +69,7 @@ public abstract class PackEmitter {
    * constant name.
    * 
    * @return <code>name</code> as a internal constant name.
-   * @see PackEmitter#name
+   * @see JavaPackEmitter#name
    */
   protected String constName() {
     return "ZZ_" + name.toUpperCase(Locale.ENGLISH);

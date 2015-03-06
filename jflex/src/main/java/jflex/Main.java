@@ -238,6 +238,13 @@ public class Main {
 
       if ( argv[i].equals("--scala") || argv[i].equals("-scala") ) { //$NON-NLS-1$ //$NON-NLS-2$
         Options.emitScala = true;
+        InputStream stream;
+        try {
+          stream = ClassLoader.getSystemResource("jflex/skeleton.scala").openStream();
+          Options.setSkeleton(new BufferedReader(new InputStreamReader(stream)));
+        } catch (Exception e){
+          e.printStackTrace();
+        }
         continue;
       }
 

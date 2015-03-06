@@ -190,42 +190,7 @@ public abstract class Emitter {
 
   protected abstract void emitLexicalStates();
 
-  protected void emitDynamicInit() {
-    int count = 0;
-    int value = dfa.table[0][0];
-
-    println("  /** ");
-    println("   * The transition table of the DFA");
-    println("   */");
-
-    CountEmitter e = new CountEmitter("Trans");
-    e.setValTranslation(+1); // allow vals in [-1, 0xFFFE]
-    e.emitInit();
-    
-    for (int i = 0; i < dfa.numStates; i++) {
-      if ( !rowKilled[i] ) {
-        for (int c = 0; c < dfa.numInput; c++) {
-          if ( !colKilled[c] ) {
-            if (dfa.table[i][c] == value) {
-              count++;
-            } 
-            else {
-              e.emit(count, value);
-
-              count = 1;
-              value = dfa.table[i][c];              
-            }
-          }
-        }
-      }
-    }
-
-    e.emit(count, value);
-    e.emitUnpack();
-    
-    println(e.toString());
-  }
-
+  protected abstract void emitDynamicInit();
 
   protected abstract void emitCharMapInitFunction(int packedCharMapPairs);
 
@@ -262,55 +227,10 @@ public abstract class Emitter {
   }
 
 
-  protected void emitRowMapArray() {
-    println("");
-    println("  /** ");
-    println("   * Translates a state to a row index in the transition table");
-    println("   */");
-    
-    HiLowEmitter e = new HiLowEmitter("RowMap");
-    e.emitInit();
-    for (int i = 0; i < dfa.numStates; i++) {
-      e.emit(rowMap[i]*numCols);
-    }    
-    e.emitUnpack();
-    println(e.toString());
-  }
+  protected abstract void emitRowMapArray();
 
 
-  protected void emitAttributes() {
-    println("  /**");
-    println("   * ZZ_ATTRIBUTE[aState] contains the attributes of state <code>aState</code>");
-    println("   */");
-    
-    CountEmitter e = new CountEmitter("Attribute");    
-    e.emitInit();
-    
-    int count = 1;
-    int value = 0; 
-    if ( dfa.isFinal[0]    ) value = FINAL;
-    if ( !isTransition[0]  ) value|= NOLOOK;
-       
-    for (int i = 1;  i < dfa.numStates; i++) {      
-      int attribute = 0;      
-      if ( dfa.isFinal[i]    ) attribute = FINAL;
-      if ( !isTransition[i]  ) attribute|= NOLOOK;
-
-      if (value == attribute) {
-        count++;
-      }
-      else {        
-        e.emit(count, value);
-        count = 1;
-        value = attribute;
-      }
-    }
-    
-    e.emit(count, value);    
-    e.emitUnpack();
-    
-    println(e.toString());
-  }
+  protected abstract void emitAttributes();
 
 
   protected abstract void emitClassCode();
@@ -358,46 +278,7 @@ public abstract class Emitter {
     return result.toString();
   }
 
-  public void emitActionTable() {
-    int lastAction = 1;    
-    int count = 0;
-    int value = 0;
-
-    println("  /** ");
-    println("   * Translates DFA states to action switch labels.");
-    println("   */");
-    CountEmitter e = new CountEmitter("Action");    
-    e.emitInit();
-
-    for (int i = 0; i < dfa.numStates; i++) {
-      int newVal = 0; 
-      if ( dfa.isFinal[i] ) {
-        Action action = dfa.action[i];
-        if (action.isEmittable()) {
-          Integer stored = actionTable.get(action);
-          if ( stored == null ) { 
-            stored = lastAction++;
-            actionTable.put(action, stored);
-          }
-          newVal = stored;
-        }
-      }
-      
-      if (value == newVal) {
-        count++;
-      }
-      else {
-        if (count > 0) e.emit(count,value);
-        count = 1;
-        value = newVal;        
-      }
-    }
-    
-    if (count > 0) e.emit(count,value);
-
-    e.emitUnpack();    
-    println(e.toString());
-  }
+  public abstract void emitActionTable();
 
   protected abstract void emitActions();
 

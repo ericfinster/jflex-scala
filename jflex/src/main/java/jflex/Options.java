@@ -9,6 +9,7 @@
 
 package jflex;
 
+import java.io.BufferedReader;
 import java.io.File;
 
 /**
@@ -112,5 +113,14 @@ public class Options {
 
   public static void setSkeleton(File skel) {
     Skeleton.readSkelFile(skel);
-  }   
+  }
+
+  public static void setSkeleton(BufferedReader reader) {
+    try{
+      Skeleton.readSkel(reader);
+    } catch (java.io.IOException e){
+      // todo maybe handle errors better
+      Out.error("Error reading skeleton file");
+    }
+  }
 }
