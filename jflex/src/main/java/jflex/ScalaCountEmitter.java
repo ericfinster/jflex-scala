@@ -47,25 +47,25 @@ public class ScalaCountEmitter extends ScalaPackEmitter {
     println("    var offset = 0");
 
     for (int i = 0; i < chunks; i++) {
-      println("    offset = zzUnpack"+name+"("+constName()+"_PACKED_"+i+", offset, result)");
+      println("    offset = zzUnpack" + name + "("+constName()+"_PACKED_"+i+", offset, result)");
     }
 
     println("    result");
     println("  }");
     nl();
 
-    println("  def zzUnpack"+name+"(packed: String, offset: Int, result: Array[Int]): Int = {");
+    println("  def zzUnpack" + name + "(packed: String, offset: Int, result: Array[Int]): Int = {");
     println("    var i = 0       /* index in packed string  */");
     println("    var j = offset  /* index in unpacked array */");
     println("    val l = packed.length()");
     println("    while (i < l) {");
-    println("      var count = packed.charAt(i); i+=1");
-    println("      val value = packed.charAt(i); i+=1");
+    println("      var count = packed.charAt(i); i += 1");
+    println("      var value = packed.charAt(i); i += 1");
     if (translate == 1) {
-      println("      value-=1");
+      println("      value -= 1");
     }
     else if (translate != 0) {
-      println("      value-= "+translate);
+      println("      value -= " + translate);
     }
     println("      result(j) = value; j+=1");
     println("      count -= 1");

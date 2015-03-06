@@ -34,7 +34,7 @@ public class ScalaEmitter extends Emitter {
 
   protected void emitScanError() {
     if (scanner.scanErrorException != null)
-      println("  @throws classOf[" + scanner.scanErrorException + "]");
+      println("  @throws[" + scanner.scanErrorException + "]");
 
     println("  def zzScanError(errorCode: Int) = {");
 
@@ -48,7 +48,7 @@ public class ScalaEmitter extends Emitter {
     skel.emitNext();
 
     if (scanner.scanErrorException != null)
-      println(" @throws classOf[" + scanner.scanErrorException + "]");
+      println(" @throws[" + scanner.scanErrorException + "]");
 
     println(" def yypushback(number: Int) = {");
   }
@@ -85,12 +85,12 @@ public class ScalaEmitter extends Emitter {
       println("   * This code was contributed by Karl Meissner <meissnersd@yahoo.com>");
       println("   */");
 
-      print("@throws classOf[java.io.IOException]");
+      println("@throws[java.io.IOException]");
       if (scanner.scanErrorException != null) {
-        print("@throws classOf["+scanner.scanErrorException+"]");
+        println("@throws["+scanner.scanErrorException+"]");
       }
       if (scanner.scanErrorException != null) {
-        print("@throws classOf["+scanner.lexThrow+"]");
+        println("@throws["+scanner.lexThrow+"]");
       }
 
       print("def debug_" + scanner.functionName + ": ");
@@ -199,7 +199,7 @@ public class ScalaEmitter extends Emitter {
     println("          }");
     println("          else if (zzAtEOF) {");
     println("            zzInput = YYEOF");
-    println("            break zzForAction");
+    println("            break");
     println("          }");
     println("          else {");
     println("            // store back cached positions");
@@ -213,7 +213,7 @@ public class ScalaEmitter extends Emitter {
     println("            zzEndReadL     = zzEndRead");
     println("            if (eof) {");
     println("              zzInput = YYEOF");
-    println("              break zzForAction");
+    println("              break");
     println("            }");
     println("            else {");
     println("              zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
@@ -226,6 +226,7 @@ public class ScalaEmitter extends Emitter {
     if (scanner.userCode.length() > 0)
       println(scanner.userCode.toString());
 
+
     if (scanner.cup2Compatible) {
       println();
       println("/* CUP2 imports */");
@@ -233,6 +234,11 @@ public class ScalaEmitter extends Emitter {
       println("import edu.tum.cup2.grammar._");
       println();
     }
+  }
+
+  protected void emitImports(){
+    println("import scala.util.control.Breaks._");
+    println();
   }
 
   protected void emitClassName() {
@@ -574,7 +580,7 @@ public class ScalaEmitter extends Emitter {
     if (!printCtorArgs) println(warn);
 
     if (scanner.initThrow != null && printCtorArgs) {
-      println("  @throws " + scanner.initThrow);
+      println("  @throws[" + scanner.initThrow + "]");
     }
     print("  def this(in: java.io.Reader");
     if (printCtorArgs) emitCtorArgs();
@@ -604,7 +610,7 @@ public class ScalaEmitter extends Emitter {
       if (!printCtorArgs) println(warn);
 
       if (scanner.initThrow != null && printCtorArgs) {
-        println("  @throws " + scanner.initThrow);
+        println("  @throws[" + scanner.initThrow + "]");
       }
       print("  def this(in: java.io.InputStream");
       if (printCtorArgs) emitCtorArgs();
@@ -641,8 +647,7 @@ public class ScalaEmitter extends Emitter {
     println("   */");
 
     if (scanner.eofThrow != null) {
-      print(" @throws ");
-      println(scanner.eofThrow);
+      println(" @throws[" + scanner.eofThrow + "]");
     }
 
     print("  def zzDoEOF() = {");
@@ -658,15 +663,14 @@ public class ScalaEmitter extends Emitter {
 
   protected void emitLexFunctHeader() {
 
-    // todo make a function to emit throws
-    print(" @throws java.io.IOException");
+    println(" @throws[java.io.IOException](\"if any I/O-Error occurs\")");
 
     if (scanner.lexThrow != null) {
-      print(" @throws " + scanner.lexThrow);
+      println(" @throws[" + scanner.lexThrow + "]");
     }
 
     if (scanner.scanErrorException != null) {
-      println(" @throws " + scanner.scanErrorException);
+      println(" @throws[" + scanner.scanErrorException + "]");
     }
 
     // todo make a function for this
@@ -802,7 +806,7 @@ public class ScalaEmitter extends Emitter {
     }
 
     println("      // set up zzAction for empty match case:");
-    println("      var zzAttributes = zzAttrL(zzState);");
+    println("      var zzAttributes = zzAttrL(zzState)");
     println("      if ( (zzAttributes & 1) == 1 ) {");
     println("        zzAction = zzState");
     println("      }");
@@ -813,8 +817,8 @@ public class ScalaEmitter extends Emitter {
 
 
   protected void emitGetRowMapNext() {
-    println("          var zzNext = zzTransL(zzRowMapL(zzState) + zzCMapL(zzInput))");
-    println("          if (zzNext == " + DFA.NO_TARGET + ") break zzForAction"); // todo this won't work
+    println("          val zzNext = zzTransL(zzRowMapL(zzState) + zzCMapL(zzInput))");
+    println("          if (zzNext == " + DFA.NO_TARGET + ") break");
     println("          zzState = zzNext");
     println();
 
@@ -824,7 +828,7 @@ public class ScalaEmitter extends Emitter {
 
     skel.emitNext();
 
-    println("            if ( (zzAttributes & " + NOLOOK + ") == " + NOLOOK + " ) break zzForAction");
+    println("            if ( (zzAttributes & " + NOLOOK + ") == " + NOLOOK + " ) break");
 
     skel.emitNext();
   }
@@ -871,7 +875,7 @@ public class ScalaEmitter extends Emitter {
   }
 
   protected void emitActions() {
-    println("        if (zzAction < 0) zzAction else ZZ_ACTION(zzAction) match {");
+    println("        (if (zzAction < 0) zzAction else ZZ_ACTION(zzAction)) match {");
 
     int i = actionTable.size() + 1;
 
@@ -879,7 +883,7 @@ public class ScalaEmitter extends Emitter {
       Action action = entry.getKey();
       int label = entry.getValue();
 
-      println("          case " + label + "=> ");
+      println("          case " + label + " => ");
 
       if (action.lookAhead() == Action.FIXED_BASE) {
         println("            // lookahead expression with fixed base length");
@@ -933,12 +937,13 @@ public class ScalaEmitter extends Emitter {
         println("\"match: --\"+zzToPrintable(yytext())+\"--\");");
         print("            println(\"action [" + action.priority + "] { ");
         print(escapify(action.content));
-        println(" }\");");
+        println(" }\")");
       }
 
-      println("            { " + action.content);
+      println("            {");
+      println("               " + action.content);
       println("            }");
-      println("          case " + (i++) + "=> // noop");
+      println("          case " + (i++) + " => null // noop");
     }
   }
 
@@ -960,21 +965,21 @@ public class ScalaEmitter extends Emitter {
         Action action = eofActions.getAction(num);
 
         if (action != null) {
-          println("            case " + name + "=> {");
+          println("            case " + name + " => {");
           if (scanner.debugOption) {
             print("              println(");
             if (scanner.lineCount)
               print("\"line: \"+(yyline+1)+\" \"+");
             if (scanner.columnCount)
               print("\"col: \"+(yycolumn+1)+\" \"+");
-            println("\"match: <<EOF>>\");");
+            println("\"match: <<EOF>>\")");
             print("              println(\"action [" + action.priority + "] { ");
             print(escapify(action.content));
             println(" }\")");
           }
           println("              " + action.content);
           println("            }");
-          println("            case " + (++last) + "=> //noop");
+          println("            case " + (++last) + " => //noop");
         }
       }
 
@@ -984,20 +989,18 @@ public class ScalaEmitter extends Emitter {
     Action defaultAction = eofActions.getDefault();
 
     if (defaultAction != null) {
-      println("              {");
       if (scanner.debugOption) {
         print("                println(");
         if (scanner.lineCount)
           print("\"line: \"+(yyline+1)+\" \"+");
         if (scanner.columnCount)
           print("\"col: \"+(yycolumn+1)+\" \"+");
-        println("\"match: <<EOF>>\");");
+        println("\"match: <<EOF>>\")");
         print("                println(\"action [" + defaultAction.priority + "] { ");
         print(escapify(defaultAction.content));
         println(" }\")");
       }
-      println("                " + defaultAction.content);
-      println("              }");
+      println("        " + defaultAction.content);
     } else if (scanner.eofVal != null)
       println("          { " + scanner.eofVal + " }");
     else if (scanner.isInteger) {
@@ -1039,6 +1042,7 @@ public class ScalaEmitter extends Emitter {
 
     emitHeader();
     emitUserCode();
+    emitImports();
     emitClassName();
 
     // this is where things become java
