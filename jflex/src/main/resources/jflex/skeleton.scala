@@ -25,7 +25,7 @@
   var zzReader = in
 
   /** the current state of the DFA */
-  var zzState: Int
+  var zzState = 0
 
   /** the current lexical state */
   var zzLexicalState = YYINITIAL
