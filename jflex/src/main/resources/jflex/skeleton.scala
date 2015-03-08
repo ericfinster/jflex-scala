@@ -143,7 +143,7 @@
    * Closes the input stream.
    */
   @throws[java.io.IOException]
-  def yyclose() = {
+  def yyclose(): Unit = {
     zzAtEOF = true            /* indicate end of file */
     zzEndRead = zzStartRead  /* invalidate buffer    */
 
@@ -164,7 +164,7 @@
    *
    * @param reader   the new input stream 
    */
-  def yyreset(reader: java.io.Reader) = {
+  def yyreset(reader: java.io.Reader): Unit = {
     zzReader = reader
     zzAtBOL  = true
     zzAtEOF  = false
@@ -194,7 +194,7 @@
    *
    * @param newState the new lexical state
    */
-  def yybegin(newState: Int) = {
+  def yybegin(newState: Int): Unit = {
     zzLexicalState = newState
   }
 
@@ -202,7 +202,7 @@
   /**
    * Returns the text matched by the current regular expression.
    */
-  def yytext(): String = new String( zzBuffer, zzStartRead, zzMarkedPos-zzStartRead )
+  def yytext(): String = new String(zzBuffer, zzStartRead, zzMarkedPos-zzStartRead)
 
 
   /**

@@ -59,13 +59,13 @@ public class ScalaCountEmitter extends ScalaPackEmitter {
     println("    var j = offset  /* index in unpacked array */");
     println("    val l = packed.length()");
     println("    while (i < l) {");
-    println("      var count = packed.charAt(i); i += 1");
-    println("      var value = packed.charAt(i); i += 1");
-    if (translate == 1) {
-      println("      value -= 1");
-    }
-    else if (translate != 0) {
+    println("      var count = packed.charAt(i).toInt; i += 1");
+    if (translate != 0) {
+      println("      var value = packed.charAt(i).toInt; i += 1");
       println("      value -= " + translate);
+    }
+    else{
+      println("      val value = packed.charAt(i); i += 1");
     }
     println("      result(j) = value; j+=1");
     println("      count -= 1");

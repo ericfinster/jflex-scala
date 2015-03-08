@@ -83,16 +83,43 @@ public abstract class ScalaPackEmitter {
   }
 
   /**
-   * Emit declaration of decoded member and open first chunk.
+   * Declare, emit first chunk of encoded string.
    */
   public void emitInit() {
+    nl();
     out.append("  private final val ");
     out.append(constName());
-    out.append(" = zzUnpack");
+    out.append("_PACKED_");
+    out.append(chunks);
+    out.append(": String =");
+    nl();
+    out.append(indent);
+    out.append("\"");
+
+    UTF8Length = 0;
+    linepos = 0;
+    chunks++;
+
+//    out.append("  private final val ");
+//    out.append(constName());
+//    out.append(": Array[Int] = zzUnpack");
+//    out.append(name);
+//    out.append("()");
+//    nl();
+//    nextChunk();
+  }
+
+  /**
+   * Emit declaration of decoded member.
+   */
+  public void emitEnd() {
+    out.append("  private final val ");
+    out.append(constName());
+    out.append(": Array[Int] = zzUnpack");
     out.append(name);
     out.append("()");
     nl();
-    nextChunk();
+//    nextChunk();
   }
 
   /**
@@ -127,16 +154,17 @@ public abstract class ScalaPackEmitter {
 
       nextChunk();
     }
-    else {
-      if (linepos >= maxEntries) {
-        // line break
-        out.append("\"+");
-        nl();
-        out.append(indent);
-        out.append("\"");
-        linepos = 0;
-      }
-    }
+    // can't do this in Scala, it causes a stack overflow in the type checker
+//    else {
+//      if (linepos >= maxEntries) {
+//        // line break
+//        out.append("\"+");
+//        nl();
+//        out.append(indent);
+//        out.append("\"");
+//        linepos = 0;
+//      }
+//    }
   }
 
   /**
@@ -153,7 +181,7 @@ public abstract class ScalaPackEmitter {
     out.append(constName());
     out.append("_PACKED_");
     out.append(chunks);
-    out.append(" =");
+    out.append(": String =");
     nl();
     out.append(indent);
     out.append("\"");

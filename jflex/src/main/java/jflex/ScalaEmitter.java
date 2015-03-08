@@ -28,7 +28,7 @@ public class ScalaEmitter extends Emitter {
     if (!hasGenLookAhead()) return;
 
     println("  /** For the backwards DFA of general lookahead statements */");
-    println("  val zzFin: Array[Boolean] = new Array[Boolean](ZZ_BUFFERSIZE+1)");
+    println("  var zzFin: Array[Boolean] = new Array[Boolean](ZZ_BUFFERSIZE+1)");
     println();
   }
 
@@ -36,7 +36,7 @@ public class ScalaEmitter extends Emitter {
     if (scanner.scanErrorException != null)
       println("  @throws[" + scanner.scanErrorException + "]");
 
-    println("  def zzScanError(errorCode: Int) = {");
+    println("  def zzScanError(errorCode: Int): Unit = {");
 
     skel.emitNext();
 
@@ -50,7 +50,7 @@ public class ScalaEmitter extends Emitter {
     if (scanner.scanErrorException != null)
       println(" @throws[" + scanner.scanErrorException + "]");
 
-    println(" def yypushback(number: Int) = {");
+    println(" def yypushback(number: Int): Unit = {");
   }
 
   protected void emitMain() {
@@ -142,7 +142,7 @@ public class ScalaEmitter extends Emitter {
 
     String className = getBaseName(scanner.className);
 
-    println("  def main(args: Array[String]) {");
+    println("  def main(args: Array[String]): Unit = {");
     println("    if (args.length == 0) {");
     println("      println(\"Usage : java " + className + " [ --encoding <name> ] <inputfile(s)>\");");
     println("    }");
@@ -188,7 +188,7 @@ public class ScalaEmitter extends Emitter {
   }
 
   protected void emitNoMatch() {
-    println("            zzScanError(ZZ_NO_MATCH)");
+    println("            zzScanError(ZZ_NO_MATCH); null");
   }
 
   // TODO these breaks will not work
@@ -346,6 +346,7 @@ public class ScalaEmitter extends Emitter {
 
     e.emit(count, value);
     e.emitUnpack();
+    e.emitEnd();
 
     println(e.toString());
   }
@@ -369,7 +370,7 @@ public class ScalaEmitter extends Emitter {
     println("    var i = 0  /* index in packed string  */");
     println("    var j = 0  /* index in unpacked array */");
     println("    while (i < " + 2 * packedCharMapPairs + ") {");
-    println("      var count = packed.charAt(i); i += 1");
+    println("      var count = packed.charAt(i).toInt; i += 1");
     println("      val value = packed.charAt(i); i += 1");
     println("      map(j) = value; j += 1; count -= 1");
     println("      while(count > 0){");
@@ -496,6 +497,7 @@ public class ScalaEmitter extends Emitter {
       e.emit(rowMap[i] * numCols);
     }
     e.emitUnpack();
+    e.emitEnd();
     println(e.toString());
   }
 
@@ -528,6 +530,7 @@ public class ScalaEmitter extends Emitter {
 
     e.emit(count, value);
     e.emitUnpack();
+    e.emitEnd();
 
     println(e.toString());
   }
@@ -872,6 +875,7 @@ public class ScalaEmitter extends Emitter {
     if (count > 0) e.emit(count,value);
 
     e.emitUnpack();
+    e.emitEnd();
     println(e.toString());
   }
 
@@ -888,15 +892,15 @@ public class ScalaEmitter extends Emitter {
 
       if (action.lookAhead() == Action.FIXED_BASE) {
         println("            // lookahead expression with fixed base length");
-        println("            zzMarkedPos = Character.offsetByCodePoints");
-        println("                (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzStartRead, " + action.getLookLength() + ")");
+        print("            zzMarkedPos = Character.offsetByCodePoints");
+        println("(zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzStartRead, " + action.getLookLength() + ")");
       }
 
       if (action.lookAhead() == Action.FIXED_LOOK ||
               action.lookAhead() == Action.FINITE_CHOICE) {
         println("            // lookahead expression with fixed lookahead length");
-        println("            zzMarkedPos = Character.offsetByCodePoints");
-        println("                (zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzMarkedPos, -" + action.getLookLength() + ")");
+        print("            zzMarkedPos = Character.offsetByCodePoints");
+        println("(zzBufferL, zzStartRead, zzEndRead - zzStartRead, zzMarkedPos, -" + action.getLookLength() + ")");
       }
 
       if (action.lookAhead() == Action.GENERAL_LOOK) {
@@ -914,13 +918,13 @@ public class ScalaEmitter extends Emitter {
         println("              if (zzFState != -1) { zzFinL(zzFPos) = ((zzAttrL(zzFState) & 1) == 1) } "); // incorrect place to increment zzFPos?
         println("              zzFPos += 1");
         println("              while (zzFPos <= zzMarkedPos) {");
-        println("                zzFinL[zzFPos] = false");
+        println("                zzFinL(zzFPos) = false");
         println("                zzFPos += 1");
         println("              }");
         println();
         println("              zzFState = " + dfa.entryState[action.getEntryState() + 1]);
         println("              zzFPos = zzMarkedPos");
-        println("              while (!zzFinL[zzFPos] || (zzAttrL[zzFState] & 1) != 1) {");
+        println("              while (!zzFinL(zzFPos) || (zzAttrL(zzFState) & 1) != 1) {");
         println("                zzInput = Character.codePointBefore(zzBufferL, zzFPos, zzStartRead)");
         println("                zzFPos -= Character.charCount(zzInput)");
         println("                zzFState = zzTransL( zzRowMapL(zzFState) + zzCMapL(zzInput) )");
@@ -941,9 +945,9 @@ public class ScalaEmitter extends Emitter {
         println(" }\")");
       }
 
-      println("            {");
+//      println("            {");
       println("               " + action.content);
-      println("            }");
+//      println("            }");
       println("          case " + (i++) + " => null // noop");
     }
   }
