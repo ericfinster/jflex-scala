@@ -237,6 +237,7 @@ public class ScalaEmitter extends Emitter {
   }
 
   protected void emitImports(){
+    println("import java.io.Reader");
     println("import scala.util.control.Breaks._");
     println();
   }
@@ -442,7 +443,7 @@ public class ScalaEmitter extends Emitter {
     println("   */");
     println("  final val ZZ_CMAP_PACKED: String = ");
 
-    int n = 0;  // numbers of entries in current line
+//    int n = 0;  // numbers of entries in current line
     print("    \"");
 
     int i = 0, numPairs = 0;
@@ -457,19 +458,19 @@ public class ScalaEmitter extends Emitter {
         printUC(value);
         count -= 0xFFFF;
         numPairs++;
-        n++;
+//        n++;
       }
       numPairs++;
       printUC(count);
       printUC(value);
 
-      if (i < intervals.length - 1) {
-        if (++n >= 10) {
-          println("\"+");
-          print("    \"");
-          n = 0;
-        }
-      }
+//      if (i < intervals.length - 1) {
+//        if (++n >= 10) {
+//          println("\"+");
+//          print("    \"");
+//          n = 0;
+//        }
+//      }
 
       i++;
     }
@@ -698,6 +699,19 @@ public class ScalaEmitter extends Emitter {
     println("    val zzTransL: Array[Int] = ZZ_TRANS");
     println("    val zzRowMapL: Array[Int] = ZZ_ROWMAP");
     println("    val zzAttrL: Array[Int] = ZZ_ATTRIBUTE");
+
+    println();
+    print("    var ret: ");
+    if (scanner.tokenType == null) {
+      if (scanner.isInteger)
+        print("Int");
+      else if (scanner.isIntWrap)
+        print("Integer");
+      else
+        print("Yytoken");
+    } else
+      print(scanner.tokenType);
+    println(" = null");
 
     skel.emitNext();
 
@@ -946,7 +960,10 @@ public class ScalaEmitter extends Emitter {
       }
 
 //      println("            {");
-      println("               " + action.content);
+      for(String actionLine : action.content.split("\n")){
+        println("             " + actionLine);
+      }
+//      println("               " + action.content);
 //      println("            }");
       println("          case " + (i++) + " => null // noop");
     }

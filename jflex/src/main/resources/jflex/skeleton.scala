@@ -288,7 +288,6 @@
 
 --- local declarations
 
-    var ret: Object = null
     while ((ret == null) && !zzAtEOF) {
       zzMarkedPosL = zzMarkedPos
 
