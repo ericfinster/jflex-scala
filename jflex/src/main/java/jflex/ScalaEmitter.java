@@ -958,13 +958,9 @@ public class ScalaEmitter extends Emitter {
         print(escapify(action.content));
         println(" }\")");
       }
-
-//      println("            {");
       for(String actionLine : action.content.split("\n")){
         println("             " + actionLine);
       }
-//      println("               " + action.content);
-//      println("            }");
       println("          case " + (i++) + " => null // noop");
     }
   }
