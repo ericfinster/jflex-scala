@@ -24,8 +24,8 @@
 
 \newcommand{\trit}{\em}
 
-\newcommand{\ver}{1.6.1-SNAPSHOT}
-\newcommand{\longver}{1.6.1-SNAPSHOT}
+\newcommand{\ver}{1.7.0-SNAPSHOT}
+\newcommand{\longver}{1.7.0-SNAPSHOT}
 \newcommand{\nextver}{1.7}
 \newcommand{\latestunicodever}{7.0}
 
@@ -46,7 +46,7 @@
 \sffamily
 {\Large The Fast Lexical Analyser Generator}\\
 \smallskip\smallskip
-Copyright \copyright 1998--2014 by \htmladdnormallink{Gerwin Klein}{http://www.doclsf.de},
+Copyright \copyright 1998--2015 by \htmladdnormallink{Gerwin Klein}{http://www.doclsf.de},
 Steve Rowe, and R\'egis D\'ecamps.
 \\
 \bigskip
@@ -139,6 +139,7 @@ C:\bs jflex-\longver\bs\\
 \phantom{}~~~~~~~~+\dd simple-maven\bs~~~~~~~~~~~(example scanner built with maven)\\
 \phantom{}~~~~~~~~+\dd standalone-maven\bs~~~~~~~(a simple standalone scanner,\\ 
 \phantom{}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~built with maven)\\
+\phantom{}~~~~~~~~+\dd zero-reader\bs~~~~~~~~~~~~(example for Readers that return 0 characters)\\
 \phantom{}~~~~+\dd lib\bs~~~~~~~~~~~~~~~~~~~~~~~~(precompiled classes, skeleton files)\\ 
 \phantom{}~~~~+\dd src\bs\\
 \phantom{}~~~~~~~~+\dd main\bs\\ 
@@ -1859,10 +1860,14 @@ Currently, the API consists of the following methods and member fields:
   return the end of file value    
 
 \item \texttt{void yyreset(java.io.Reader reader)}\\
-  closes the current input stream, and resets the scanner to read from
-  a new input stream.  All internal variables are reset, the old input
-  stream {\em cannot} be reused (content of the internal buffer is
-  discarded and lost).  The lexical state is set to \texttt{YY\_INITIAL}.
+  closes the current input stream, and resets the scanner to read from a new
+  Reader. All internal variables are reset, the old Reader \emph{cannot} be
+  reused (content of the internal buffer is discarded and lost). The lexical
+  state is set to \texttt{YY\_INITIAL}. The \verb+%{init+ code is \emph{not}
+  included in \texttt{yyreset}, because it is assumed to run in the context
+  of a constructor, not a normal method. If \verb+%{init+ does need to be
+  repeated, consider constructing a new lexer object instead or additionally
+  calling a custom function that performs any additional user-level state reset.
 
 \item \texttt{void yypushStream(java.io.Reader reader)}\\
  Stores the current input stream on a stack, and

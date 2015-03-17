@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * JFlex 1.6.1-SNAPSHOT                                                    *
- * Copyright (C) 1998-2014  Gerwin Klein <lsf@jflex.de>                    *
+ * JFlex 1.7.0-SNAPSHOT                                                    *
+ * Copyright (C) 1998-2015  Gerwin Klein <lsf@jflex.de>                    *
  * All rights reserved.                                                    *
  *                                                                         *
  * License: BSD                                                            *
@@ -14,7 +14,7 @@ import java.io.File;
  * Performs simple semantic analysis on regular expressions.
  *
  * @author Gerwin Klein
- * @version JFlex 1.6.1-SNAPSHOT
+ * @version JFlex 1.7.0-SNAPSHOT
  */
 public final class SemCheck {
 

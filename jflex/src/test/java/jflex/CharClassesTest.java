@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * JFlex 1.6.1-SNAPSHOT                                                    *
- * Copyright (C) 1998-2008  Gerwin Klein <lsf@jflex.de>                    *
+ * JFlex 1.7.0-SNAPSHOT                                                    *
+ * Copyright (C) 1998-2015  Gerwin Klein <lsf@jflex.de>                    *
  * All rights reserved.                                                    *
  *                                                                         *
  * License: BSD                                                            *
@@ -16,7 +16,7 @@ import jflex.unicode.UnicodeProperties;
  * CharClassesTest
  * 
  * @author Gerwin Klein
- * @version JFlex 1.6.1-SNAPSHOT
+ * @version JFlex 1.7.0-SNAPSHOT
  */
 public class CharClassesTest extends TestCase {
 
