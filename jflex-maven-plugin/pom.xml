@@ -1,47 +1,25 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.jflex</groupId>
-  <artifactId>jflex-maven-plugin</artifactId>
+  <groupId>edu.umass.cs.iesl</groupId>
+  <artifactId>jflex-scala-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>JFlex Maven Plugin</name>
+  <name>JFlex Scala Maven Plugin</name>
   <version>1.7.0-SNAPSHOT</version>
   <description>
-      This is a Maven 2/3 plugin to generate Lexer code in Java from
+      This is a Maven 2/3 plugin to generate Lexer code in Scala from
       a Lexer specification, using JFlex.
-  
-      This plugin was previously called maven-jflex-plugin.
-        
-      For JFlex 1.4.3 and earlier, see the maven-jflex-plugin 
-      documentation here: 
-      http://jflex.sourceforge.net/maven-jflex-plugin/
   </description>
-  <url>http://jflex.sourceforge.net/jflex-maven-plugin/</url>
+  <url>https://github.com/strubell/jflex-scala</url>
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
     <relativePath/>
   </parent>
-  <mailingLists>
-    <mailingList>
-      <name>JFlex User List</name>
-      <subscribe>https://lists.sourceforge.net/lists/listinfo/jflex-users</subscribe>
-      <unsubscribe>https://lists.sourceforge.net/lists/listinfo/jflex-users</unsubscribe>
-      <post>jflex-users@lists.sourceforge.net</post>
-      <archive>http://sourceforge.net/mailarchive/forum.php?forum_name=jflex-users</archive>
-    </mailingList>
-    <mailingList>
-      <name>JFlex Announcement List</name>
-      <subscribe>https://lists.sourceforge.net/lists/listinfo/jflex-announce</subscribe>
-      <unsubscribe>https://lists.sourceforge.net/lists/listinfo/jflex-announce</unsubscribe>
-      <post>jflex-announce@lists.sourceforge.net</post>
-      <archive>http://sourceforge.net/mailarchive/forum.php?forum_name=jflex-announce</archive>
-    </mailingList>
-  </mailingLists>
   <issueManagement>
     <system>Github</system>
-    <url>https://github.com/jflex-de/jflex/issues</url>
+    <url>https://github.com/strubell/jflex-scala/issues</url>
   </issueManagement>
   <prerequisites>
         <maven>2.2.1</maven>
@@ -49,43 +27,20 @@
   <inceptionYear>2007</inceptionYear>
   <developers>
     <developer>
-      <id>decamps</id>
-      <name>Régis Décamps</name>
-      <email>decamps@users.sf.net</email>
+      <id>strubell</id>
+      <name>Emma Strubell</name>
+      <email>strubell@cs.umass.edu</email>
       <roles>
         <role>developer</role>
       </roles>
-      <timezone>+1</timezone>
+      <timezone>-4</timezone>
     </developer>
   </developers>
-  <contributors>
-    <contributor>
-      <email>benjamin.bentmann@udo.edu</email>
-      <name>Benjamin Bentmann</name>
-      <roles>
-        <role>reviewer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <email>support_0384@newplanetsoftware.com</email>
-      <name>John Lindal</name>
-      <roles>
-        <role>reviewer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <email>gerwin.klein@nicta.com.au</email>
-      <name>Gerwin Klein</name>
-      <roles>
-        <role>ant-task developer</role>
-      </roles>
-    </contributor>
-  </contributors>
   <licenses>
     <license>
       <name>BSD</name>
-            <url>http://opensource.org/licenses/BSD-3-Clause</url>
-            <distribution>repo</distribution>
+        <url>http://opensource.org/licenses/BSD-3-Clause</url>
+        <distribution>repo</distribution>
     </license>
   </licenses>
     <properties>
@@ -333,30 +288,8 @@
     </plugins>
   </reporting>
   <scm>
-    <connection>scm:git:git@github.com:jflex-de/jflex.git</connection>
-    <developerConnection>scm:git:git@github.com:jflex-de/jflex.git</developerConnection>
-    <url>scm:git:git@github.com:jflex-de/jflex.git</url>
+    <connection>scm:git:git@github.com:strubell/jflex-scala.git</connection>
+    <developerConnection>scm:git:git@github.com:strubell/jflex-scala.git</developerConnection>
+    <url>scm:git:git@github.com:strubell/jflex-scala.git</url>
   </scm>
-  <profiles>
-      <profile>
-          <id>release</id>
-          <distributionManagement>
-              <site>
-                <id>sourceforge</id>
-                <name>SourceForge JFlex Maven Plugin site</name>
-                <url>scp://shell.sourceforge.net/home/project-web/jflex/htdocs/jflex-maven-plugin</url>
-              </site>
-          </distributionManagement>
-      </profile>
-      <profile>
-          <id>localhost</id>
-          <distributionManagement>
-              <site>
-                <id>localhost</id>
-                <name>Local site</name>
-                <url>scp://localhost/tmp/jflex/jflex-maven-plugin</url>
-              </site>
-          </distributionManagement>
-      </profile>
-  </profiles>
 </project>
