@@ -8,9 +8,9 @@
     <version>1.7.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <name>JFlex</name>
+  <name>JFlex-scala</name>
   <url>https://github.com/strubell/jflex-scala</url>
-  <inceptionYear>1998</inceptionYear>
+  <inceptionYear>2015</inceptionYear>
   <description>
     JFlex is a lexical analyzer generator (also known as
     scanner generator) for Java™, written in Java. This version
