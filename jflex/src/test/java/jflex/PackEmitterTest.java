@@ -19,18 +19,18 @@ import junit.framework.TestCase;
  */
 public class PackEmitterTest extends TestCase {
 
-  private PackEmitter p;
+  private JavaPackEmitter p;
 
 
   /**
-   * Constructor for PackEmitterTest.
+   * Constructor for JavaPackEmitterTest.
    */
   public PackEmitterTest() {
-    super("PackEmitter test");
+    super("JavaPackEmitter test");
   }
 
   public void setUp() {
-    p = new PackEmitter("Bla") {
+    p = new JavaPackEmitter("Bla") {
           public void emitUnpack() { }
     };
   }
