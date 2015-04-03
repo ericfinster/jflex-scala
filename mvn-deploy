@@ -43,5 +43,5 @@ mvn install
 
 # Deploy the deployable stuff to the Sonatype OSS Maven repository
 cd ..
-mvn -Psonatype-oss-release deploy
+mvn -Psonatype-oss-release deploy -Dgpg.passphrase=
 
