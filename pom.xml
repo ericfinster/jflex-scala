@@ -218,7 +218,7 @@
     </pluginManagement>
   </build>
 
-  <profiles>
+  <!--<profiles>-->
     <!--<profile>-->
       <!--<id>sonatype-release</id>-->
 
@@ -293,7 +293,7 @@
         <!--</plugins>-->
       <!--</build>-->
     <!--</profile>-->
-  </profiles>
+  <!--</profiles>-->
 
 </project>
 
