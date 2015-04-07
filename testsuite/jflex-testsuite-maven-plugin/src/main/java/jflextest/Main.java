@@ -94,9 +94,9 @@ public class Main {
       catch (TestFailException e) {
         System.out.println("Test ["+test+"] failed!");
       }
-      catch (LoadException e) {
-        System.out.println("Load Error:" + e.getMessage());
-      }
+//      catch (LoadException e) {
+//        System.out.println("Load Error:" + e.getMessage());
+//      }
       catch (IOException e) {
         System.out.println("IO Error:" + e.getMessage());
       }

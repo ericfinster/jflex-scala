@@ -2,13 +2,14 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>jflex-maven-plugin</artifactId>
+        <artifactId>jflex-scala-maven-plugin</artifactId>
         <configuration>
           <project implementation="org.apache.maven.plugin.testing.stubs.MavenProjectStub"/>
           <outputDirectory>target/test/unit/recursion-test/target/generated-sources/jflex</outputDirectory>
           <lexDefinitions>
             <lexDefinition>src/test/resources/unit/recursion-test/src/main/jflex</lexDefinition>
           </lexDefinitions>
+          <emitScala>false</emitScala>
         </configuration>
       </plugin>
     </plugins>

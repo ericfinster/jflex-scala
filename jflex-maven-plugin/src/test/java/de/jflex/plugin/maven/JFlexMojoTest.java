@@ -47,7 +47,7 @@ public class JFlexMojoTest extends AbstractMojoTestCase {
 		File unitBasedir = new File(getBasedir(), "src/test/resources/unit");
 		File testPom = new File(unitBasedir, testCase + "/plugin-config.xml");
 		JFlexMojo mojo = new JFlexMojo();
-		configureMojo(mojo, "jflex-maven-plugin", testPom);
+		configureMojo(mojo, "jflex-scala-maven-plugin", testPom);
 		if (getVariableValueFromObject(mojo, "project") == null) {
 			setVariableValueToObject(mojo, "project", new MavenProjectStub());
 		}

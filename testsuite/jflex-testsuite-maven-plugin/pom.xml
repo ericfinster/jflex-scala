@@ -46,6 +46,9 @@
         <artifactId>jflex-scala-maven-plugin</artifactId>
         <!--<version>1.7.0-SNAPSHOT</version>-->
         <version>1.6.1</version>
+        <configuration>
+          <emitScala>false</emitScala>
+        </configuration>
         <executions>
           <execution>
             <goals>
