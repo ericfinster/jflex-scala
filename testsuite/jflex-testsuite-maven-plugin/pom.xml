@@ -44,7 +44,8 @@
       <plugin>
         <groupId>edu.umass.cs.iesl</groupId>
         <artifactId>jflex-scala-maven-plugin</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <!--<version>1.7.0-SNAPSHOT</version>-->
+        <version>1.6.1</version>
         <executions>
           <execution>
             <goals>
