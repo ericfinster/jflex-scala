@@ -8,9 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 package de.jflex.plugin.maven;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -271,8 +269,16 @@ public class JFlexMojo extends AbstractMojo {
 		Options.verbose = verbose;
 		Options.unused_warning = unusedWarning;
 		Options.dot = dot;
-    Options.legacy_dot = legacyDot;
-    Options.emitInputStreamCtor = inputStreamCtor;
+    	Options.legacy_dot = legacyDot;
+    	Options.emitInputStreamCtor = inputStreamCtor;
+		Options.emitScala = true; // this is the jflex-scala-maven-plugin, after all
+		InputStream stream; // use scala skeleton by default
+		try {
+			stream = ClassLoader.getSystemResource("jflex/skeleton.scala").openStream();
+			Options.setSkeleton(new BufferedReader(new InputStreamReader(stream)));
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 		if (skeleton != null) {
 			Options.setSkeleton(skeleton);
 		}
