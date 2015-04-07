@@ -159,6 +159,13 @@ public class JFlexMojo extends AbstractMojo {
    */
   private boolean inputStreamCtor = false; // NOPMD
 
+	/**
+	 * If true, the generated scanner will be in Scala.
+	 *
+	 * @parameter default-value="true"
+	 */
+	private boolean emitScala = true;
+
   /**
 	 * Generate java parsers from lexer definition files.
 	 *
@@ -272,10 +279,10 @@ public class JFlexMojo extends AbstractMojo {
     	Options.legacy_dot = legacyDot;
     	Options.emitInputStreamCtor = inputStreamCtor;
 
-		Options.emitScala = true; // this is the jflex-scala-maven-plugin, after all
+		Options.emitScala = emitScala; // this is the jflex-scala-maven-plugin, after all
 
 		if (skeleton != null) {
-			getLog().warn("Using the default Scala skeleton, custom skeletons not currently supported");
+			if(emitScala) getLog().warn("Using the default Scala skeleton, custom skeletons not currently supported");
 			Options.setSkeleton(skeleton);
 		}
 
