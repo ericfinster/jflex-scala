@@ -106,6 +106,16 @@ public class Main {
       if (Options.dot) 
         dfa.writeDot(Emitter.normalize("dfa-min.dot", null)); //$NON-NLS-1$
 
+      if(Options.emitScala){
+        InputStream stream; // use scala skeleton by default
+        try {
+          stream = ClassLoader.getSystemResource("jflex/skeleton.scala").openStream();
+          Options.setSkeleton(new BufferedReader(new InputStreamReader(stream)));
+        } catch (Exception e){
+          e.printStackTrace();
+        }
+      }
+
       time.start();
       
       Emitter e = Options.emitScala? new ScalaEmitter(inputFile, parser, dfa): new JavaEmitter(inputFile, parser, dfa);
@@ -250,13 +260,7 @@ public class Main {
 
       if ( argv[i].equals("--scala") || argv[i].equals("-scala") ) { //$NON-NLS-1$ //$NON-NLS-2$
         Options.emitScala = true;
-        InputStream stream;
-        try {
-          stream = ClassLoader.getSystemResource("jflex/skeleton.scala").openStream();
-          Options.setSkeleton(new BufferedReader(new InputStreamReader(stream)));
-        } catch (Exception e){
-          e.printStackTrace();
-        }
+        Out.warning("Using the default Scala skeleton, custom skeletons not currently supported");
         continue;
       }
 
