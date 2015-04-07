@@ -42,7 +42,7 @@ mvn clean
 mvn install
 
 # Deploy the deployable stuff to the Sonatype OSS Maven repository (SNAPSHOT)
-cd ../jflex
+cd ..
 mvn -Psonatype-release deploy -Dgpg.passphrase=
 
 # Do a release
