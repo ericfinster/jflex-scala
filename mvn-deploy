@@ -50,6 +50,6 @@ cd ..
 mvn -Psonatype-release deploy -Dgpg.passphrase=
 
 # Do a release
-#mvn versions:set -DnewVersion=1.6.1
+mvn clean versions:set -DnewVersion=1.6.1 -DoldVersion=1.7.0-SNAPSHOT deploy -P release
 #mvn clean deploy -P release
 
