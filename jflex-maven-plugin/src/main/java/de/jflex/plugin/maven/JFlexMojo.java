@@ -242,7 +242,7 @@ public class JFlexMojo extends AbstractMojo {
 			MojoExecutionException {
 		assert lexFile.isAbsolute() : lexFile;
 
-		getLog().debug("Generating Java code from " + lexFile.getName());
+		getLog().debug("Generating " + (emitScala? "Scala" : "Java") + " code from " + lexFile.getName());
 		ClassInfo classInfo = null;
 		try {
 			classInfo = LexSimpleAnalyzer.guessPackageAndClass(lexFile);
@@ -257,8 +257,8 @@ public class JFlexMojo extends AbstractMojo {
 		checkParameters(lexFile);
 
 		/* set destination directory */
-		File generatedFile = new File(outputDirectory,
-				classInfo.getOutputFilename());
+		String generatedFilename = emitScala? classInfo.getOutputFilename().replaceFirst("java$", "scala"): classInfo.getOutputFilename();
+		File generatedFile = new File(outputDirectory, generatedFilename);
 
 		/* Generate only if needs to */
 		if (lexFile.lastModified() - generatedFile.lastModified() <= this.staleMillis) {
