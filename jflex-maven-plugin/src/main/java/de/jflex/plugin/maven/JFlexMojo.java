@@ -279,7 +279,7 @@ public class JFlexMojo extends AbstractMojo {
     	Options.legacy_dot = legacyDot;
     	Options.emitInputStreamCtor = inputStreamCtor;
 
-		Options.emitScala = emitScala; // this is the jflex-scala-maven-plugin, after all
+		Options.emitScala = emitScala;
 
 		if (skeleton != null) {
 			if(emitScala) getLog().warn("Using the default Scala skeleton, custom skeletons not currently supported");
