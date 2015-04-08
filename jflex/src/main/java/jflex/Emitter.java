@@ -216,14 +216,28 @@ public abstract class Emitter {
    */
   protected void printUC(int c) {
     if (c > 255) {
-      out.print("\\u");
-      if (c < 0x1000) out.print("0");
-      out.print(Integer.toHexString(c));
+      out.append("\\u");
+      if (c < 0x1000) out.append("0");
+      out.append(Integer.toHexString(c));
+    } else if (c == 34) {
+      out.append("\\\"");
+    } else if (c == 92) {
+      out.append("\\\\");
     }
     else {
-      out.print("\\");
-      out.print(Integer.toOctalString(c));
-    }    
+      out.append("\\u00");
+      if (c < 0x10) out.append("0");
+      out.append(Integer.toHexString(c));
+    }
+    // if (c > 255) {
+    //   out.print("\\u");
+    //   if (c < 0x1000) out.print("0");
+    //   out.print(Integer.toHexString(c));
+    // }
+    // else {
+    //   out.print("\\");
+    //   out.print(Integer.toOctalString(c));
+    // }    
   }
 
 

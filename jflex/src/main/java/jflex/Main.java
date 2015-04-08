@@ -109,8 +109,8 @@ public class Main {
       if(Options.emitScala){
         InputStream stream; // use scala skeleton by default
         try {
-          stream = Main.class.getClassLoader().getResource("jflex/skeleton.scala").openStream();
-//          stream = ClassLoader.getSystemResource("jflex/skeleton.scala").openStream();
+//          stream = Main.class.getClassLoader().getResource("jflex/skeleton.scala").openStream();
+          stream = ClassLoader.getSystemResource("jflex/skeleton.scala").openStream();
           Options.setSkeleton(new BufferedReader(new InputStreamReader(stream)));
         } catch (Exception e){
           e.printStackTrace();

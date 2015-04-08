@@ -39,7 +39,7 @@ public class ScalaCountEmitter extends ScalaPackEmitter {
    */
   public void emitUnpack() {
     // close last string chunk:
-    println("\";");
+    println("'E');");
 
     nl();
     println("  def zzUnpack"+name+"(): Array[Int] = {");
@@ -54,18 +54,18 @@ public class ScalaCountEmitter extends ScalaPackEmitter {
     println("  }");
     nl();
 
-    println("  def zzUnpack" + name + "(packed: String, offset: Int, result: Array[Int]): Int = {");
+    println("  def zzUnpack" + name + "(packed: Array[Char], offset: Int, result: Array[Int]): Int = {");
     println("    var i = 0       /* index in packed string  */");
     println("    var j = offset  /* index in unpacked array */");
-    println("    val l = packed.length()");
+    println("    val l = packed.length() - 1");
     println("    while (i < l) {");
-    println("      var count = packed.charAt(i).toInt; i += 1");
+    println("      var count = packed(i).toInt; i += 1");
     if (translate != 0) {
-      println("      var value = packed.charAt(i).toInt; i += 1");
+      println("      var value = packed(i).toInt; i += 1");
       println("      value -= " + translate);
     }
     else{
-      println("      val value = packed.charAt(i); i += 1");
+      println("      val value = packed(i); i += 1");
     }
     println("      result(j) = value; j+=1");
     println("      count -= 1");

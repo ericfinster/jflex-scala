@@ -36,7 +36,7 @@ public class ScalaHiLowEmitter extends ScalaPackEmitter {
    */
   public void emitUnpack() {
     // close last string chunk:
-    println("\"");
+    println("'E');");
     nl();
     println("  def zzUnpack"+name+"(): Array[Int] = {");
     println("    val result = new Array[Int]("+numEntries+")");
@@ -50,10 +50,10 @@ public class ScalaHiLowEmitter extends ScalaPackEmitter {
     println("  }");
 
     nl();
-    println("  def zzUnpack"+name+"(packed: String, offset: Int, result: Array[Int]): Int = {");
+    println("  def zzUnpack"+name+"(packed: Array[Char], offset: Int, result: Array[Int]): Int = {");
     println("    var i = 0  /* index in packed string  */");
     println("    var j = offset  /* index in unpacked array */");
-    println("    val l = packed.length()");
+    println("    val l = packed.length() - 1");
     println("    while (i < l) {");
     println("      val high = packed.charAt(i) << 16; i += 1");
     println("      result(j) = high | packed.charAt(i); j += 1; i += 1");

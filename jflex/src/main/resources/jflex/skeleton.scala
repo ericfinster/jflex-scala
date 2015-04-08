@@ -139,6 +139,38 @@
   }
 
     
+  def codePointAt(buf: Array[Char], index: Int, limit: Int): Int = {
+    if (index > limit || limit > buf.length) {
+      throw new IndexOutOfBoundsException
+    } else {
+      val h = buf(index)
+      if (Character.isHighSurrogate(h)) {
+        if (index + 1 < limit) {
+          val l = buf(index + 1)
+          if (Character.isLowSurrogate(l)) {
+            Character.toCodePoint(h, l)
+          } else h.toInt
+        } else h.toInt
+      } else h.toInt
+    }
+  }
+
+  def codePointBefore(buf: Array[Char], index: Int, start: Int): Int = {
+    if (index <= start || start < 0 || start > buf.length) {
+      throw new IndexOutOfBoundsException
+    } else {
+      val l = buf(index - 1)
+      if (Character.isLowSurrogate(l)) {
+        if (index - 2 >= start) {
+          val h = buf(index - 2)
+          if (Character.isHighSurrogate(h)) {
+            Character.toCodePoint(h, l)
+          } else l.toInt
+        } else l.toInt
+      } else l.toInt
+    }
+  }
+
   /**
    * Closes the input stream.
    */
@@ -322,7 +354,7 @@
       }
       else {
 --- actions
-          case _ =>
+          case v =>
 --- no match
         }
       }

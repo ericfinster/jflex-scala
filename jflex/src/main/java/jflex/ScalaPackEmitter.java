@@ -91,10 +91,10 @@ public abstract class ScalaPackEmitter {
     out.append(constName());
     out.append("_PACKED_");
     out.append(chunks);
-    out.append(": String =");
+    out.append(": Array[Char] =");
     nl();
     out.append(indent);
-    out.append("\"");
+    out.append("Array(");
 
     UTF8Length = 0;
     linepos = 0;
@@ -137,7 +137,9 @@ public abstract class ScalaPackEmitter {
     // cast ok because of prec  
     char c = (char) i;
 
+    out.append("'");
     printUC(c);
+    out.append("', ");
     UTF8Length += UTF8Length(c);
     linepos++;
   }
@@ -149,7 +151,7 @@ public abstract class ScalaPackEmitter {
   public void breaks() {
     if (UTF8Length >= maxSize) {
       // close current chunk
-      out.append("\"");
+      out.append(")");
       nl();
 
       nextChunk();
@@ -181,10 +183,10 @@ public abstract class ScalaPackEmitter {
     out.append(constName());
     out.append("_PACKED_");
     out.append(chunks);
-    out.append(": String =");
+    out.append(": Array[Char] =");
     nl();
     out.append(indent);
-    out.append("\"");
+    out.append("Array(");
 
     UTF8Length = 0;
     linepos = 0;
@@ -209,11 +211,20 @@ public abstract class ScalaPackEmitter {
       out.append("\\u");
       if (c < 0x1000) out.append("0");
       out.append(Integer.toHexString(c));
+    // } else if (c == 34) {
+    //   out.append("\"");
+    } else if (c == 92) {
+      out.append("\\\\");
     }
     else {
-      out.append("\\");
-      out.append(Integer.toOctalString(c));
+      out.append("\\u00");
+      if (c < 0x10) out.append("0");
+      out.append(Integer.toHexString(c));
     }
+    // else {
+    //   out.append("\\");
+    //   out.append(Integer.toOctalString(c));
+    // }
   }
 
   /**

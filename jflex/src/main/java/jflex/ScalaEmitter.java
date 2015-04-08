@@ -188,13 +188,14 @@ public class ScalaEmitter extends Emitter {
   }
 
   protected void emitNoMatch() {
+    println("            println(v.toString); ");
     println("            zzScanError(ZZ_NO_MATCH); null");
   }
 
   // TODO these breaks will not work
   protected void emitNextInput() {
     println("          if (zzCurrentPosL < zzEndReadL) {");
-    println("            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
+    println("            zzInput = codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
     println("            zzCurrentPosL += Character.charCount(zzInput)");
     println("          }");
     println("          else if (zzAtEOF) {");
@@ -216,7 +217,7 @@ public class ScalaEmitter extends Emitter {
     println("              break");
     println("            }");
     println("            else {");
-    println("              zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
+    println("              zzInput = codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)");
     println("              zzCurrentPosL += Character.charCount(zzInput)");
     println("            }");
     println("          }");
@@ -366,13 +367,13 @@ public class ScalaEmitter extends Emitter {
     println("   * @param packed   the packed character translation table");
     println("   * @return         the unpacked character translation table");
     println("   */");
-    println("  def zzUnpackCMap(packed: String): Array[Char] = {");
+    println("  def zzUnpackCMap(packed: Array[Char]): Array[Char] = {");
     println("    val map = new Array[Char](0x" + Integer.toHexString(cl.getMaxCharCode() + 1) + ")");
     println("    var i = 0  /* index in packed string  */");
     println("    var j = 0  /* index in unpacked array */");
     println("    while (i < " + 2 * packedCharMapPairs + ") {");
-    println("      var count = packed.charAt(i).toInt; i += 1");
-    println("      val value = packed.charAt(i); i += 1");
+    println("      var count = packed(i).toInt; i += 1");
+    println("      val value = packed(i); i += 1");
     println("      map(j) = value; j += 1; count -= 1");
     println("      while(count > 0){");
     println("        map(j) = value; j += 1; count -= 1");
@@ -441,10 +442,9 @@ public class ScalaEmitter extends Emitter {
     println("  /** ");
     println("   * Translates characters to character classes");
     println("   */");
-    println("  final val ZZ_CMAP_PACKED: String = ");
-
+    println("  final val ZZ_CMAP_PACKED: Array[Char] = ");
 //    int n = 0;  // numbers of entries in current line
-    print("    \"");
+    print("    Array(");
 
     int i = 0, numPairs = 0;
     int count, value;
@@ -454,15 +454,22 @@ public class ScalaEmitter extends Emitter {
 
       // count could be >= 0x10000
       while (count > 0xFFFF) {
+	print("'");
         printUC(0xFFFF);
+	print("', '");
         printUC(value);
         count -= 0xFFFF;
+	print("', ");
         numPairs++;
 //        n++;
       }
       numPairs++;
+
+      print("'");
       printUC(count);
+      print("', '");
       printUC(value);
+      print("', ");
 
 //      if (i < intervals.length - 1) {
 //        if (++n >= 10) {
@@ -475,7 +482,7 @@ public class ScalaEmitter extends Emitter {
       i++;
     }
 
-    println("\"");
+    println("'E');");
     println();
 
     println("  /** ");
@@ -727,7 +734,7 @@ public class ScalaEmitter extends Emitter {
       println("      for (zzCurrentPosL = zzStartRead  ;");
       println("           zzCurrentPosL < zzMarkedPosL ;");
       println("           zzCurrentPosL += zzCharCount ) {");
-      println("        zzCh = Character.codePointAt(zzBufferL, zzCurrentPosL, zzMarkedPosL)");
+      println("        zzCh = codePointAt(zzBufferL, zzCurrentPosL, zzMarkedPosL)");
       println("        zzCharCount = Character.charCount(zzCh)");
       println("        zzCh match {");
       println("        case '\\u000B' | '\\u000C' | '\\u0085' | '\\u2028' | '\\u2029' =>");
@@ -925,7 +932,7 @@ public class ScalaEmitter extends Emitter {
         println("              val zzFinL = zzFin");
         println("              while (zzFState != -1 && zzFPos < zzMarkedPos) {");
         println("                zzFinL(zzFPos) = ((zzAttrL(zzFState) & 1) == 1)");
-        println("                zzInput = Character.codePointAt(zzBufferL, zzFPos, zzMarkedPos)");
+        println("                zzInput = codePointAt(zzBufferL, zzFPos, zzMarkedPos)");
         println("                zzFPos += Character.charCount(zzInput)");
         println("                zzFState = zzTransL( zzRowMapL(zzFState) + zzCMapL(zzInput) )");
         println("              }");
@@ -939,7 +946,7 @@ public class ScalaEmitter extends Emitter {
         println("              zzFState = " + dfa.entryState[action.getEntryState() + 1]);
         println("              zzFPos = zzMarkedPos");
         println("              while (!zzFinL(zzFPos) || (zzAttrL(zzFState) & 1) != 1) {");
-        println("                zzInput = Character.codePointBefore(zzBufferL, zzFPos, zzStartRead)");
+        println("                zzInput = codePointBefore(zzBufferL, zzFPos, zzStartRead)");
         println("                zzFPos -= Character.charCount(zzInput)");
         println("                zzFState = zzTransL( zzRowMapL(zzFState) + zzCMapL(zzInput) )");
         println("              }");
